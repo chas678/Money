@@ -28,7 +28,7 @@ public abstract class SerializabilityTestCase {
      * @return a new instance of the class under test
      * @throws Exception
      */
-    protected abstract Serializable createInstance() throws Exception;
+    protected abstract Serializable createInstance();
 
     /**
      * Sets up the test fixture.
@@ -51,13 +51,14 @@ public abstract class SerializabilityTestCase {
      */
     @Test
     public final void testSerializability() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(obj);
-        oos.flush();
-        oos.close();
-        byte[] frozenChunk = baos.toByteArray();
-        baos.close();
+        byte[] frozenChunk;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(obj);
+            oos.flush();
+            oos.close();
+            frozenChunk = baos.toByteArray();
+        }
         ByteArrayInputStream bais = new ByteArrayInputStream(frozenChunk);
         ObjectInputStream ois = new ObjectInputStream(bais);
         Serializable thawed = (Serializable) ois.readObject();
@@ -74,7 +75,7 @@ public abstract class SerializabilityTestCase {
      * @param actual
      *            the deserialized form of the object
      */
-    protected void checkThawedObject(Serializable expected, Serializable actual) throws Exception {
+    protected void checkThawedObject(Serializable expected, Serializable actual) {
         assertEquals("thawed object comparison", expected, actual);
     }
 }

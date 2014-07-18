@@ -212,8 +212,8 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      */
     public final Money[] allocate(final long[] ratios) {
         long total = 0;
-        for (int i = 0; i < ratios.length; i++) {
-            total += ratios[i];
+        for (long ratio : ratios) {
+            total += ratio;
         }
         long remainder = amount;
         Money[] results = new Money[ratios.length];
@@ -254,7 +254,7 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     /**
      * Comparison of Money objects used by Comparable interface. This method allows Money to be sorted.
      * 
-     * @param other
+     * @param otherMoney
      * @return Boolean int -1 if less than, 1 if greater than and 0 if equal to other
      * @throws ClassCastException
      *             if other is not a Money

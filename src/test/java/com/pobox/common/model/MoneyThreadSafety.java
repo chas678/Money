@@ -21,7 +21,7 @@ public class MoneyThreadSafety {
 
     @Test
     public void testFormatThreadSafe() throws Exception {
-        List<MoneyCheck> runners = new ArrayList<MoneyCheck>();
+        List<MoneyCheck> runners = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             MoneyCheck moneyCheck = new MoneyCheck();
             runners.add(moneyCheck);
@@ -32,25 +32,22 @@ public class MoneyThreadSafety {
     public static void assertConcurrent(final String message, final List<? extends Runnable> runnables,
             final int maxTimeoutSeconds) throws InterruptedException {
         final int numThreads = runnables.size();
-        final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
+        final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
         final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
         try {
             final CountDownLatch allExecutorThreadsReady = new CountDownLatch(numThreads);
             final CountDownLatch afterInitBlocker = new CountDownLatch(1);
             final CountDownLatch allDone = new CountDownLatch(numThreads);
             for (final Runnable submittedTestRunnable : runnables) {
-                threadPool.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        allExecutorThreadsReady.countDown();
-                        try {
-                            afterInitBlocker.await();
-                            submittedTestRunnable.run();
-                        } catch (final Throwable e) {
-                            exceptions.add(e);
-                        } finally {
-                            allDone.countDown();
-                        }
+                threadPool.submit(() -> {
+                    allExecutorThreadsReady.countDown();
+                    try {
+                        afterInitBlocker.await();
+                        submittedTestRunnable.run();
+                    } catch (final Throwable e) {
+                        exceptions.add(e);
+                    } finally {
+                        allDone.countDown();
                     }
                 });
             }

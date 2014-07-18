@@ -40,7 +40,7 @@ public abstract class EqualsHashCodeTestCase {
      *         each other.
      * @throws Exception
      */
-    protected abstract Object createInstance() throws Exception;
+    protected abstract Object createInstance();
 
     /**
      * Creates and returns an instance of the class under test.
@@ -49,7 +49,7 @@ public abstract class EqualsHashCodeTestCase {
      *         each other, but not to the objects returned from {@link #createInstance() createInstance}.
      * @throws Exception
      */
-    protected abstract Object createNotEqualInstance() throws Exception;
+    protected abstract Object createNotEqualInstance();
 
     /**
      * Sets up the test fixture.

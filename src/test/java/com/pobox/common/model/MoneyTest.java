@@ -249,7 +249,7 @@ public class MoneyTest {
 
     @Test
     public void MoneyDoubleCurrency() {
-        double inputAmount = new Double(23242.22).doubleValue();
+        double inputAmount = 23242.22;
         Currency currency = Currency.getInstance("GBP");
         Money money = new Money(inputAmount, currency);
         assertEquals("GBP", money.getCurrency().getCurrencyCode());
@@ -259,7 +259,7 @@ public class MoneyTest {
 
     @Test
     public void MoneyLongCurrency() {
-        long inputAmount = new Long(2324222L).longValue();
+        long inputAmount = 2324222L;
         Currency currency = Currency.getInstance("GBP");
         Money money = new Money(inputAmount, currency);
         assertEquals("GBP", money.getCurrency().getCurrencyCode());
@@ -288,7 +288,7 @@ public class MoneyTest {
     @Test
     public void MultiplyDouble() {
         aMoney = Money.dollars(10.01);
-        double multiplier = new Double(2.2).doubleValue();
+        double multiplier = 2.2;
         Money expected = Money.dollars(22.02);
         Money result = aMoney.multiply(multiplier);
         assertEquals(expected, result);
