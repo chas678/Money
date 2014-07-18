@@ -38,11 +38,11 @@ equivalent, of course) BigDecimal is a little more inconvenient to use, but has 
 float are not recommended, since they always carry small rounding differences the Currency class encapsulates
 standard identifiers for the world's currencies
 
-###Number of digits :
+####Number of digits :
 
-<=9 : use int, long , or BigDecimal
-<=18 : use long or BigDecimal
->18 : use BigDecimal
+	<=9  : use int, long , or BigDecimal
+	<=18 : use long or BigDecimal
+	>18  : use BigDecimal
 
 ###Reminders for BigDecimal :
 
