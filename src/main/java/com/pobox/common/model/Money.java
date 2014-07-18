@@ -196,7 +196,7 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     }
 
     /**
-     * Allocate according to proscribed ratios. The base amounts are allocated by simple division, rounding down. So the
+     * Allocate according to prescribed ratios. The base amounts are allocated by simple division, rounding down. So the
      * allocated amount will always be less than or equal to the total.
      * 
      * Remainder contains the unallocated amount. Which will always be a whole number less than 'i'. So simply gives
@@ -392,8 +392,11 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     }
 
     /**
-     * Money representation (based on currancy). AMOUNT CODE 1.00 USD One dollar us 1.00 CAD One dollar canadian 1 JPY
-     * One yen
+     * Money representation (based on currency). 
+     * AMOUNT CODE 
+     * 1.00 USD One dollar us 
+     * 1.00 CAD One dollar Canadian 
+     * 1 JPY One yen
      * 
      * You may wish to format the amount according to your locale using the following code fragment: Currency currency =
      * money.currency(); double amount = money.amount().doubleValue();
