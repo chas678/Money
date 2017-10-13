@@ -1,8 +1,6 @@
 package com.pobox.common.model;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -14,23 +12,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MoneyThreadSafety {
 
-    @Test
-    public void testFormatThreadSafe() throws Exception {
-        List<MoneyCheck> runners = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            MoneyCheck moneyCheck = new MoneyCheck();
-            runners.add(moneyCheck);
-        }
-        assertConcurrent("NumberFormatFails", runners, 5);
-    }
-
     public static void assertConcurrent(final String message, final List<? extends Runnable> runnables,
-            final int maxTimeoutSeconds) throws InterruptedException {
+                                        final int maxTimeoutSeconds) throws InterruptedException {
         final int numThreads = runnables.size();
         final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
         final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
@@ -53,16 +45,25 @@ public class MoneyThreadSafety {
             }
             // wait until all threads are ready
             assertTrue(
-                    "Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent",
-                    allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS));
+                    allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS),
+                    "Timeout initializing threads! Perform long lasting initializations before passing runnables to " +
+                            "assertConcurrent");
             // start all test runners
             afterInitBlocker.countDown();
-            assertTrue(message + " timeout! More than" + maxTimeoutSeconds + "seconds",
-                    allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS));
+            assertTrue(allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS),
+                    message + " timeout! More than" + maxTimeoutSeconds + "seconds");
         } finally {
             threadPool.shutdownNow();
         }
-        assertTrue(message + "failed with exception(s)" + exceptions, exceptions.isEmpty());
+        assertTrue(exceptions.isEmpty(), message + "failed with exception(s)" + exceptions);
+    }
+
+    @Test
+    public void testFormatThreadSafe() throws Exception {
+        List<MoneyCheck> runners = IntStream.range(0, 1000)
+                .mapToObj(i -> new MoneyCheck())
+                .collect(Collectors.toList());
+        assertConcurrent("NumberFormatFails", runners, 5);
     }
 
     class MoneyCheck implements Runnable {

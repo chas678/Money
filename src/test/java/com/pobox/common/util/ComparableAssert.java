@@ -1,7 +1,7 @@
 package com.pobox.common.util;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A set of assert methods specially targeted to comparable objects.
@@ -18,8 +18,8 @@ public class ComparableAssert {
      * <tt>AssertionFailedError</tt> if it is greater or equal.
      */
     static public <T extends Comparable<T>> void assertLesser(String message, T equal1, T actual) {
-        assertNotNull(message, equal1);
-        assertNotNull(message, actual);
+        assertNotNull(equal1, message);
+        assertNotNull(actual, message);
         if (equal1.compareTo(actual) <= 0) {
             failLesser(message, equal1, actual);
         }
@@ -38,8 +38,8 @@ public class ComparableAssert {
      * <tt>AssertionFailedError</tt> if it is lesser.
      */
     static public <T extends Comparable<T>> void assertNotLesser(String message, T limit, T actual) {
-        assertNotNull(message, limit);
-        assertNotNull(message, actual);
+        assertNotNull(limit, message);
+        assertNotNull(actual, message);
         if (limit.compareTo(actual) > 0) {
             failNotLesser(message, limit, actual);
         }
@@ -58,8 +58,8 @@ public class ComparableAssert {
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
     static public <T extends Comparable<T>> void assertEquals(String message, T equal1, T actual) {
-        assertNotNull(message, equal1);
-        assertNotNull(message, actual);
+        assertNotNull(equal1, message);
+        assertNotNull(actual, message);
         if (equal1.compareTo(actual) != 0) {
             failNotEquals(message, equal1, actual);
         }
@@ -78,8 +78,8 @@ public class ComparableAssert {
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
     static public <T extends Comparable<T>> void assertNotEquals(String message, T expected, T actual) {
-        assertNotNull(message, expected);
-        assertNotNull(message, actual);
+        assertNotNull(expected, message);
+        assertNotNull(actual, message);
         if (expected.compareTo(actual) == 0) {
             failEquals(message, expected);
         }
@@ -98,8 +98,8 @@ public class ComparableAssert {
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
     static public <T extends Comparable<T>> void assertGreater(String message, T less, T actual) {
-        assertNotNull(message, less);
-        assertNotNull(message, actual);
+        assertNotNull(less, message);
+        assertNotNull(actual, message);
         if (less.compareTo(actual) >= 0) {
             failGreater(message, less, actual);
         }
@@ -118,8 +118,8 @@ public class ComparableAssert {
      * <tt>AssertionFailedError</tt> if it is greater.
      */
     static public <T extends Comparable<T>> void assertNotGreater(String message, T limit, T actual) {
-        assertNotNull(message, limit);
-        assertNotNull(message, actual);
+        assertNotNull(limit, message);
+        assertNotNull(actual, message);
         if (limit.compareTo(actual) < 0) {
             failNotGreater(message, limit, actual);
         }

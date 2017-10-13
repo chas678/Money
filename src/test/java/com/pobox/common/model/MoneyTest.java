@@ -1,22 +1,24 @@
 package com.pobox.common.model;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MoneyTest {
     private Money aMoney;
@@ -25,9 +27,10 @@ public class MoneyTest {
     public MoneyTest() {
         // Setting default locale so test runs on other localized machines.
         Locale.setDefault(Locale.US);
+        //        Locale.setDefault(new Locale("sv","SE"));
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         aMoney = Money.dollars(23.45);
         bMoney = Money.dollars(12133.456);
@@ -43,12 +46,8 @@ public class MoneyTest {
     @Test
     public void AddDiffCurrencies() {
         bMoney = new Money(1.11, Currency.getInstance("NZD"));
-        try {
-            aMoney.add(bMoney);
-            fail("expected InvalidArg Exception as wrong currency");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare different currencies.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.add(bMoney));
+        assertEquals("Cannot compare different currencies.", exception.getMessage());
     }
 
     @Test
@@ -62,12 +61,8 @@ public class MoneyTest {
 
     @Test
     public void AddNull() {
-        try {
-            aMoney.add(null);
-            fail("expected InvalidArg Exception as null");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare money to null.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.add(null));
+        assertEquals("Cannot compare money to null.", exception.getMessage());
     }
 
     @Test
@@ -111,7 +106,7 @@ public class MoneyTest {
     // use ratio allocate to solve Foemmels Conundrum
     @Test
     public void AllocateLongArray() {
-        long[] allocation = { 3, 7 };
+        long[] allocation = {3, 7};
         Money[] result = Money.dollars(0.05).allocate(allocation);
         assertEquals(Money.dollars(0.02), result[0]);
         assertEquals(Money.dollars(0.03), result[1]);
@@ -137,7 +132,7 @@ public class MoneyTest {
         assertEquals(2, aMoney.getCurrency().getDefaultFractionDigits());
 
         // if in UK Locale - shouold be a ISO AUD symbol
-        assertEquals("CAD", aMoney.getCurrency().getSymbol(Locale.UK));// ALT
+        assertEquals("CA$", aMoney.getCurrency().getSymbol(Locale.UK));// ALT
         // 0163
         // but if in Australia then should be a $ symbol
         assertEquals("$", aMoney.getCurrency().getSymbol(Locale.CANADA)); //
@@ -150,8 +145,8 @@ public class MoneyTest {
         assertEquals(2, aMoney.getCurrency().getDefaultFractionDigits());
 
         // ISO4217 CNY symbol
-        assertEquals("CNY", aMoney.getCurrency().getSymbol());
-        // Aus locale - so not ¥
+        assertEquals("CN¥", aMoney.getCurrency().getSymbol());
+        // check locale -  not ¥
     }
 
     @Test
@@ -164,7 +159,7 @@ public class MoneyTest {
         assertEquals("£", aMoney.getCurrency().getSymbol(Locale.UK)); // ALT
         // 0163
         // but if not - like in Aus - should be ISO GBP symbol
-        assertEquals("GBP", aMoney.getCurrency().getSymbol(Locale.GERMANY)); // Aus locale
+        assertEquals("£", aMoney.getCurrency().getSymbol(Locale.GERMANY)); // Aus locale
     }
 
     @Test
@@ -181,7 +176,7 @@ public class MoneyTest {
         aMoney = Money.dollars(2323.21);
         bMoney = new Money(2323.21, Currency.getInstance("AUD"));
 
-        assertFalse(aMoney.equals(bMoney));
+        assertNotEquals(aMoney, bMoney);
     }
 
     @Test
@@ -193,22 +188,14 @@ public class MoneyTest {
     @Test
     public void GreaterThanDiffCurrencies() {
         bMoney = new Money(2323.21, Currency.getInstance("AUD"));
-        try {
-            aMoney.greaterThan(bMoney);
-            fail("expected InvalidArg Exception as wrong currency");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare different currencies.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.greaterThan(bMoney));
+        assertEquals("Cannot compare different currencies.", exception.getMessage());
     }
 
     @Test
     public void GreaterThanNull() {
-        try {
-            aMoney.greaterThan(null);
-            fail("expected InvalidArg Exception as null");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare money to null.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.greaterThan(null));
+        assertEquals("Cannot compare money to null.", exception.getMessage());
     }
 
     @Test
@@ -220,30 +207,21 @@ public class MoneyTest {
     @Test
     public void LessThanDiffCurrencies() {
         bMoney = new Money(2323.21, Currency.getInstance("AUD"));
-        try {
-            aMoney.lessThan(bMoney);
-            fail("expected InvalidArg Exception as wrong currency");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare different currencies.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.lessThan(bMoney));
+        assertEquals("Cannot compare different currencies.", exception.getMessage());
     }
 
     @Test
     public void LessThanNull() {
-
-        try {
-            aMoney.lessThan(null);
-            fail("expected InvalidArg Exception as null");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare money to null.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.lessThan(null));
+        assertEquals("Cannot compare money to null.", exception.getMessage());
     }
 
     @Test
     public void MoneyBigDecimalCurrencyInt() {
         BigDecimal bdInput = BigDecimal.valueOf(220300, 2);
         Money expected = new Money(2203, Currency.getInstance("INR"));
-        Money result = new Money(bdInput, Currency.getInstance("INR"), BigDecimal.ROUND_CEILING);
+        Money result = new Money(bdInput, Currency.getInstance("INR"), RoundingMode.CEILING);
         assertEquals(expected, result);
     }
 
@@ -281,7 +259,7 @@ public class MoneyTest {
         aMoney = Money.dollars(10.01);
         BigDecimal multiplier = BigDecimal.valueOf(22, 0);
         Money expected = Money.dollars(220.22);
-        Money result = aMoney.multiply(multiplier, BigDecimal.ROUND_CEILING);
+        Money result = aMoney.multiply(multiplier, RoundingMode.CEILING);
         assertEquals(expected, result);
     }
 
@@ -304,12 +282,8 @@ public class MoneyTest {
     @Test
     public void SubtractDiffCurrencies() {
         bMoney = new Money(1.11, Currency.getInstance("NZD"));
-        try {
-            aMoney.subtract(bMoney);
-            fail("expected InvalidArg Exception as wrong currency");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare different currencies.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.subtract(bMoney));
+        assertEquals("Cannot compare different currencies.", exception.getMessage());
     }
 
     @Test
@@ -323,12 +297,8 @@ public class MoneyTest {
 
     @Test
     public void subtractNull() {
-        try {
-            aMoney.subtract(null);
-            fail("expected InvalidArg Exception as null");
-        } catch (IllegalArgumentException iae) {
-            assertEquals("Cannot compare money to null.", iae.getMessage());
-        }
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.subtract(null));
+        assertEquals("Cannot compare money to null.", exception.getMessage());
     }
 
     @Test

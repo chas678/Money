@@ -1,8 +1,8 @@
 package com.pobox.common.model;
 
-import java.io.Serializable;
-
 import com.pobox.common.util.SerializabilityTestCase;
+
+import java.io.Serializable;
 
 public class MoneySerializabilityTest extends SerializabilityTestCase {
     @Override

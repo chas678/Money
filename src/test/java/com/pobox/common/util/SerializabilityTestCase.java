@@ -1,7 +1,8 @@
 package com.pobox.common.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,10 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import junit.framework.AssertionFailedError;
-
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Extend me in order to test the serializability of a class. Override my {@link #createInstance() createInstance}
@@ -24,7 +23,7 @@ public abstract class SerializabilityTestCase {
 
     /**
      * Creates and returns an instance of the class under test.
-     * 
+     *
      * @return a new instance of the class under test
      * @throws Exception
      */
@@ -32,15 +31,15 @@ public abstract class SerializabilityTestCase {
 
     /**
      * Sets up the test fixture.
-     * 
+     *
      * @throws Exception
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         obj = createInstance();
         // We want these assertions to yield errors, not failures.
         try {
-            assertNotNull("createInstance() returned null", obj);
+            assertNotNull(obj, "createInstance() returned null");
         } catch (AssertionFailedError ex) {
             throw new IllegalArgumentException(ex.getMessage());
         }
@@ -69,13 +68,11 @@ public abstract class SerializabilityTestCase {
      * Template method--override this to perform checks on the deserialized form of the object serialized in
      * {@link #testSerializability}. If not overridden, this asserts that the pre-serialization and deserialized forms
      * of the object compare equal via {@link Object#equals(Object) equals}.
-     * 
-     * @param expected
-     *            the pre-serialization form of the object
-     * @param actual
-     *            the deserialized form of the object
+     *
+     * @param expected the pre-serialization form of the object
+     * @param actual   the deserialized form of the object
      */
     protected void checkThawedObject(Serializable expected, Serializable actual) {
-        assertEquals("thawed object comparison", expected, actual);
+        assertEquals(expected, actual, "thawed object comparison");
     }
 }
