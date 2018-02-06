@@ -10,13 +10,13 @@
 
     <properties>
         <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
-        <guava.version>23.2-jre</guava.version>
+        <guava.version>24.0-jre</guava.version>
         <hamcrest.version>1.3</hamcrest.version>
         <hamcrestjson.version>0.2</hamcrestjson.version>
-        <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
-        <jackson.version>2.9.2</jackson.version>
+        <jacoco.plugin.version>0.8.0</jacoco.plugin.version>
+        <jackson.version>2.9.4</jackson.version>
         <java.version>9</java.version>
-        <joda.jackson.version>2.9.2</joda.jackson.version>
+        <joda.jackson.version>2.9.4</joda.jackson.version>
         <logback.version>1.2.3</logback.version>
         <maven.compiler.plugin>3.7.0</maven.compiler.plugin>
         <maven.enforcer.plugin>3.0.0-M1</maven.enforcer.plugin>
@@ -26,11 +26,14 @@
         <maven.source.plugin>2.2.1</maven.source.plugin>
         <maven.surefire.plugin>2.20</maven.surefire.plugin>
         <maven.version.range>[3,3.6)</maven.version.range>
-        <mockito.version>2.11.0</mockito.version>
+        <mockito.version>2.13.0</mockito.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <slf4j.version>1.8.0-beta0</slf4j.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <sysout.slf4j.version>1.0.2</sysout.slf4j.version>
+        <junit-jupiter-api.version>5.0.3</junit-jupiter-api.version>
+        <junit-platform-surefire-provider.version>1.0.3</junit-platform-surefire-provider.version>
+        <junit-jupiter-engine.version>5.0.3</junit-jupiter-engine.version>
     </properties>
 
     <dependencies>
@@ -66,11 +69,6 @@
             <artifactId>logback-core</artifactId>
             <version>${logback.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -140,13 +138,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.0.1</version>
+            <version>${junit-jupiter-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.0.1</version>
+            <version>${junit-jupiter-api.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -169,6 +167,7 @@
                         <compilerArgument>-Xlint:all</compilerArgument>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
+                        <release>${java.version}</release>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <compilerArgs>
                             <arg>-verbose</arg>
@@ -199,12 +198,12 @@
                         <dependency>
                             <groupId>org.junit.platform</groupId>
                             <artifactId>junit-platform-surefire-provider</artifactId>
-                            <version>1.0.1</version>
+                            <version>${junit-platform-surefire-provider.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>org.junit.jupiter</groupId>
                             <artifactId>junit-jupiter-engine</artifactId>
-                            <version>5.0.1</version>
+                            <version>${junit-jupiter-engine.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -239,7 +238,7 @@
                                         <version>${maven.version.range}</version>
                                     </requireMavenVersion>
                                     <requireJavaVersion>
-                                        <version>1.8</version>
+                                        <version>9</version>
                                     </requireJavaVersion>
                                 </rules>
                                 <fail>true</fail>

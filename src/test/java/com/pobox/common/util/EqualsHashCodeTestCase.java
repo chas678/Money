@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -75,9 +76,9 @@ public abstract class EqualsHashCodeTestCase {
             assertNotSame(eq2, eq3);
             assertNotSame(eq2, neq);
             assertNotSame(eq3, neq);
-            assertEquals(eq1.getClass(), eq2.getClass(), "1st and 2nd equal instances of different classes");
-            assertEquals(eq1.getClass(), eq3.getClass(), "1st and 3rd equal instances of different classes");
-            assertEquals(eq1.getClass(), neq.getClass(), "1st equal instance and not-equal instance of different " +
+            assertSame(eq1.getClass(), eq2.getClass(), "1st and 2nd equal instances of different classes");
+            assertSame(eq1.getClass(), eq3.getClass(), "1st and 3rd equal instances of different classes");
+            assertSame(eq1.getClass(), neq.getClass(), "1st equal instance and not-equal instance of different " +
                     "classes");
         } catch (AssertionFailedError ex) {
             throw new IllegalArgumentException(ex.getMessage());

@@ -198,7 +198,7 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * @param ratios to allocate the remainder to.
      * @return Money Array of allocated amounts.
      */
-    public final Money[] allocate(final long[] ratios) {
+    public final Money[] allocate(final long... ratios) {
         long total = Arrays.stream(ratios).sum();
         long remainder = amount;
         Money[] results = new Money[ratios.length];

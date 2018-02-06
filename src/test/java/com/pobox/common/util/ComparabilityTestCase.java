@@ -7,6 +7,7 @@ import org.opentest4j.AssertionFailedError;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 
 /**
@@ -69,9 +70,9 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
             assertNotNull(equal1, "createEqualInstance() returned null");
             assertNotNull(equal2, "2nd createEqualInstance() returned null");
             assertNotNull(greater, "createGreaterInstance() returned null");
-            assertEquals(less.getClass(), equal1.getClass(), "less and equal1 of different classes");
-            assertEquals(less.getClass(), equal2.getClass(), "less and equal2 of different classes");
-            assertEquals(less.getClass(), greater.getClass(), "less and greater of different classes");
+            assertSame(less.getClass(), equal1.getClass(), "less and equal1 of different classes");
+            assertSame(less.getClass(), equal2.getClass(), "less and equal2 of different classes");
+            assertSame(less.getClass(), greater.getClass(), "less and greater of different classes");
             checkForEquality(equal1, equal2);
         } catch (AssertionFailedError ex) {
             throw new IllegalArgumentException(ex.getMessage());
