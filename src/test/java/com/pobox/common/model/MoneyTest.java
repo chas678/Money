@@ -31,7 +31,7 @@ public class MoneyTest {
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         aMoney = Money.dollars(23.45);
         bMoney = Money.dollars(12133.456);
     }
@@ -345,7 +345,7 @@ public class MoneyTest {
     }
 
     @Test
-    public void DeepCopyShouldReturnNewObject() throws Exception {
+    public void DeepCopyShouldReturnNewObject() {
         Money aMon = aMoney.deepCopy();
         assertThat(aMon, is(not(sameInstance(aMoney))));
         assertThat(aMon, is(equalTo(aMoney)));

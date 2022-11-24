@@ -10,31 +10,41 @@
 
     <properties>
         <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
-        <guava.version>24.0-jre</guava.version>
-        <hamcrest.version>1.3</hamcrest.version>
+        <guava.version>31.1-jre</guava.version>
+        <hamcrest.version>2.2</hamcrest.version>
         <hamcrestjson.version>0.2</hamcrestjson.version>
-        <jacoco.plugin.version>0.8.0</jacoco.plugin.version>
-        <jackson.version>2.9.4</jackson.version>
-        <java.version>9</java.version>
-        <joda.jackson.version>2.9.4</joda.jackson.version>
-        <logback.version>1.2.3</logback.version>
-        <maven.compiler.plugin>3.7.0</maven.compiler.plugin>
-        <maven.enforcer.plugin>3.0.0-M1</maven.enforcer.plugin>
-        <maven.jar.plugin>3.0.2</maven.jar.plugin>
-        <maven.javadoc.plugin>3.0.0-M1</maven.javadoc.plugin>
-        <maven.site.plugin>3.2</maven.site.plugin>
+        <jacoco.plugin.version>0.8.8</jacoco.plugin.version>
+        <jackson.version>2.14.1</jackson.version>
+        <java.version>19</java.version>
+        <joda.jackson.version>2.14.1</joda.jackson.version>
+        <logback.version>1.4.5</logback.version>
+        <maven.compiler.plugin>3.10.1</maven.compiler.plugin>
+        <maven.enforcer.plugin>3.1.0</maven.enforcer.plugin>
+        <maven.jar.plugin>3.2.0</maven.jar.plugin>
+        <maven.javadoc.plugin>3.4.0</maven.javadoc.plugin>
+        <maven.site.plugin>3.12.0</maven.site.plugin>
         <maven.source.plugin>2.2.1</maven.source.plugin>
-        <maven.surefire.plugin>2.20</maven.surefire.plugin>
-        <maven.version.range>[3,3.6)</maven.version.range>
-        <mockito.version>2.13.0</mockito.version>
+        <maven.surefire.plugin>3.0.0-M6</maven.surefire.plugin>
+        <maven.version.range>[3,3.9)</maven.version.range>
+        <mockito.version>4.9.0</mockito.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <slf4j.version>1.7.25</slf4j.version>
+        <slf4j.version>2.0.4</slf4j.version>
         <sysout.slf4j.version>1.0.2</sysout.slf4j.version>
-        <junit-jupiter-api.version>5.0.3</junit-jupiter-api.version>
-        <junit-platform-surefire-provider.version>1.0.3</junit-platform-surefire-provider.version>
-        <junit-jupiter-engine.version>5.0.3</junit-jupiter-engine.version>
+        <junit-jupiter.version>5.9.1</junit-jupiter.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -75,51 +85,30 @@
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
-
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
-
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
-
         </dependency>
         <dependency>
             <groupId>uk.org.lidalia</groupId>
             <artifactId>sysout-over-slf4j</artifactId>
             <version>${sysout.slf4j.version}</version>
             <scope>test</scope>
-
         </dependency>
+
         <!-- TEST DEPENDENCIES -->
         <dependency>
             <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-integration</artifactId>
+            <artifactId>hamcrest</artifactId>
             <version>${hamcrest.version}</version>
             <scope>test</scope>
         </dependency>
@@ -138,13 +127,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit-jupiter-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit-jupiter-api.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -194,18 +181,6 @@
                             <exclude>**/Abstract*.java</exclude>
                         </excludes>
                     </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.junit.platform</groupId>
-                            <artifactId>junit-platform-surefire-provider</artifactId>
-                            <version>${junit-platform-surefire-provider.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.junit.jupiter</groupId>
-                            <artifactId>junit-jupiter-engine</artifactId>
-                            <version>${junit-jupiter-engine.version}</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -238,7 +213,7 @@
                                         <version>${maven.version.range}</version>
                                     </requireMavenVersion>
                                     <requireJavaVersion>
-                                        <version>9</version>
+                                        <version>19</version>
                                     </requireJavaVersion>
                                 </rules>
                                 <fail>true</fail>
@@ -277,47 +252,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>pre-unit-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>pre-integration-test</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>target/jacoco-it.exec</destFile>
-                            <propertyName>failsafe.argLine</propertyName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>post-integration-test</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>target/jacoco-it.exec</dataFile>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

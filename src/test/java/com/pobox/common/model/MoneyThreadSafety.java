@@ -66,7 +66,7 @@ public class MoneyThreadSafety {
         assertConcurrent("NumberFormatFails", runners, 5);
     }
 
-    class MoneyCheck implements Runnable {
+    static class MoneyCheck implements Runnable {
 
         @Override
         public void run() {

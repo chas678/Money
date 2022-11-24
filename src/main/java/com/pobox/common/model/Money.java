@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
  * Money class, Represents a monetary value.
  * <p>
  * For a full description see the book Patterns of Enterprise Application Architecture (Martin Fowler) page 488 or
- * http://www.martinfowler.com/eaaCatalog/money.html
+ * <a href="http://www.martinfowler.com/eaaCatalog/money.html">...</a>
  * <p>
  * A large proportion of the computers in this world manipulate money, so it's always puzzled me that money isn't
  * actually a first class data type in any mainstream programming language. The lack of a type causes problems, the most
@@ -35,7 +35,7 @@ import java.util.stream.IntStream;
  * handles them. Of course, it's still surprising that none of the mainstream base class libraries actually do this. -
  * Martin Fowler
  * <p>
- * ISO4217 codes for currency http://www.xe.com/iso4217.htm
+ * ISO4217 c<a href="odes">for currency http://www.</a>xe.com/iso4217.htm
  * <p>
  * Example Usage:
  * <p>
@@ -84,7 +84,6 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     /**
      * Cloning ctor.
      *
-     * @param src
      */
     public Money(final Money src) {
         this.amount = src.amount;
@@ -133,7 +132,6 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     /**
      * Convenience constructor - assumes USD.
      *
-     * @param amount
      * @return a USD Money object
      */
     public static Money dollars(final double amount) {
@@ -142,8 +140,7 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
 
     NumberFormat getFormatter() {
         NumberFormat formatter = NumberFormat.getInstance();
-        if (formatter instanceof DecimalFormat) {
-            DecimalFormat decimalFormatter = (DecimalFormat) formatter;
+        if (formatter instanceof DecimalFormat decimalFormatter) {
             decimalFormatter.applyPattern("#,##0.00 \u00A4\u00A4");
 
             decimalFormatter.setCurrency(currency);
@@ -155,14 +152,13 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
 
         formatter.setMinimumFractionDigits(currency.getDefaultFractionDigits());
         formatter.setMaximumFractionDigits(currency.getDefaultFractionDigits());
-        log.trace("Formatter setup: {}", formatter.toString());
+        log.trace("Formatter setup: {}", formatter);
         return formatter;
     }
 
     /**
      * Simple addition ensuring matched Currency.
      *
-     * @param other
      * @return Money
      */
     public final Money add(final Money other) {
@@ -239,7 +235,6 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     /**
      * Comparison of Money objects used by Comparable interface. This method allows Money to be sorted.
      *
-     * @param otherMoney
      * @return Boolean int -1 if less than, 1 if greater than and 0 if equal to other
      * @throws ClassCastException       if other is not a Money
      * @throws IllegalArgumentException if other Money is not of the same Currency
@@ -261,7 +256,6 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     /**
      * Money instances must have same currency and amount to be equal.
      *
-     * @param otherObject
      * @return boolean
      * @see java.lang.Object#equals(Object)
      */
@@ -281,7 +275,6 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     /**
      * Convience implementation of greater than function.
      *
-     * @param other
      * @return Boolean True if money is greater than other
      */
     public final boolean greaterThan(final Money other) {
@@ -352,7 +345,6 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     /**
      * Simple addition ensuring matched Currency.
      *
-     * @param other
      * @return Money
      */
     public final Money subtract(final Money other) {
@@ -392,15 +384,11 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return a new Money like this one.
      */
     public final Money deepCopy() {
-        try {
-            return clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("clone not supported", e);
-        }
+        return clone();
     }
 
     @Override
-    public final Money clone() throws CloneNotSupportedException {
+    public final Money clone() {
         return new Money(this);
     }
 }

@@ -25,17 +25,15 @@ public abstract class SerializabilityTestCase {
      * Creates and returns an instance of the class under test.
      *
      * @return a new instance of the class under test
-     * @throws Exception
      */
     protected abstract Serializable createInstance();
 
     /**
      * Sets up the test fixture.
      *
-     * @throws Exception
      */
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         obj = createInstance();
         // We want these assertions to yield errors, not failures.
         try {

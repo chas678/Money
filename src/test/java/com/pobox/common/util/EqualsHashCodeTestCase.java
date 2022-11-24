@@ -40,7 +40,6 @@ public abstract class EqualsHashCodeTestCase {
      *
      * @return a new instance of the class under test; each object returned from this method should compare equal to
      * each other.
-     * @throws Exception
      */
     protected abstract Object createInstance();
 
@@ -49,17 +48,15 @@ public abstract class EqualsHashCodeTestCase {
      *
      * @return a new instance of the class under test; each object returned from this method should compare equal to
      * each other, but not to the objects returned from {@link #createInstance() createInstance}.
-     * @throws Exception
      */
     protected abstract Object createNotEqualInstance();
 
     /**
      * Sets up the test fixture.
      *
-     * @throws Exception
      */
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         eq1 = createInstance();
         eq2 = createInstance();
         eq3 = createInstance();

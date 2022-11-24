@@ -31,7 +31,6 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
      *
      * @return a new instance of the class under test; each object returned from this method should compare less than
      * the objects returned from {@link #createEqualInstance() createEqualInstance()}
-     * @throws Exception
      */
     protected abstract T createLessInstance();
 
@@ -40,7 +39,6 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
      *
      * @return a new instance of the class under test; each object returned from this method should compare equal to
      * each other
-     * @throws Exception
      */
     protected abstract T createEqualInstance();
 
@@ -49,17 +47,15 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
      *
      * @return a new instance of the class under test; each object returned from this method should compare greater than
      * the objects returned from {@link #createEqualInstance() createEqualInstance()}
-     * @throws Exception
      */
     protected abstract T createGreaterInstance();
 
     /**
      * Sets up the test fixture.
      *
-     * @throws Exception
      */
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         less = createLessInstance();
         equal1 = createEqualInstance();
         equal2 = createEqualInstance();
