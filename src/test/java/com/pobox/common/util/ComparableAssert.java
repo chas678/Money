@@ -17,10 +17,10 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is lesser than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is greater or equal.
      */
-    static public <T extends Comparable<T>> void assertLesser(String message, T equal1, T actual) {
+    public static <T extends Comparable<T>> void assertLesser(String message, T equal1, T actual) {
         assertNotNull(equal1, message);
         assertNotNull(actual, message);
-        if (equal1.compareTo(actual) <= 0) {
+        if (0 >= equal1.compareTo(actual)) {
             failLesser(message, equal1, actual);
         }
     }
@@ -29,7 +29,7 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is lesser than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is greater or equal.
      */
-    static public <T extends Comparable<T>> void assertLesser(T equal1, T actual) {
+    public static <T extends Comparable<T>> void assertLesser(T equal1, T actual) {
         assertLesser(null, equal1, actual);
     }
 
@@ -37,10 +37,10 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is not lesser than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is lesser.
      */
-    static public <T extends Comparable<T>> void assertNotLesser(String message, T limit, T actual) {
+    public static <T extends Comparable<T>> void assertNotLesser(String message, T limit, T actual) {
         assertNotNull(limit, message);
         assertNotNull(actual, message);
-        if (limit.compareTo(actual) > 0) {
+        if (0 < limit.compareTo(actual)) {
             failNotLesser(message, limit, actual);
         }
     }
@@ -49,7 +49,7 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is not lesser than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is lesser.
      */
-    static public <T extends Comparable<T>> void assertNotLesser(T limit, T actual) {
+    public static <T extends Comparable<T>> void assertNotLesser(T limit, T actual) {
         assertNotLesser(null, limit, actual);
     }
 
@@ -57,10 +57,10 @@ public class ComparableAssert {
      * Asserts that the <tt>expected</tt> and <tt>actual</tt> are equals (comparables). Throws an
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
-    static public <T extends Comparable<T>> void assertEquals(String message, T equal1, T actual) {
+    public static <T extends Comparable<T>> void assertEquals(String message, T equal1, T actual) {
         assertNotNull(equal1, message);
         assertNotNull(actual, message);
-        if (equal1.compareTo(actual) != 0) {
+        if (0 != equal1.compareTo(actual)) {
             failNotEquals(message, equal1, actual);
         }
     }
@@ -69,7 +69,7 @@ public class ComparableAssert {
      * Asserts that the <tt>expected</tt> and <tt>actual</tt> are equals (comparables). Throws an
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
-    static public <T extends Comparable<T>> void assertEquals(T equal1, T actual) {
+    public static <T extends Comparable<T>> void assertEquals(T equal1, T actual) {
         assertEquals(null, equal1, actual);
     }
 
@@ -77,10 +77,10 @@ public class ComparableAssert {
      * Asserts that the <tt>expected</tt> and <tt>actual</tt> are not equals (comparables). Throws an
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
-    static public <T extends Comparable<T>> void assertNotEquals(String message, T expected, T actual) {
+    public static <T extends Comparable<T>> void assertNotEquals(String message, T expected, T actual) {
         assertNotNull(expected, message);
         assertNotNull(actual, message);
-        if (expected.compareTo(actual) == 0) {
+        if (0 == expected.compareTo(actual)) {
             failEquals(message, expected);
         }
     }
@@ -89,7 +89,7 @@ public class ComparableAssert {
      * Asserts that the <tt>expected</tt> and <tt>actual</tt> are not equals (comparables). Throws an
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
-    static public <T extends Comparable<T>> void assertNotEquals(T expected, T actual) {
+    public static <T extends Comparable<T>> void assertNotEquals(T expected, T actual) {
         assertNotEquals(null, expected, actual);
     }
 
@@ -97,10 +97,10 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is greater than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
-    static public <T extends Comparable<T>> void assertGreater(String message, T less, T actual) {
+    public static <T extends Comparable<T>> void assertGreater(String message, T less, T actual) {
         assertNotNull(less, message);
         assertNotNull(actual, message);
-        if (less.compareTo(actual) >= 0) {
+        if (0 <= less.compareTo(actual)) {
             failGreater(message, less, actual);
         }
     }
@@ -109,7 +109,7 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is greater than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is lesser or equal.
      */
-    static public <T extends Comparable<T>> void assertGreater(T less, T actual) {
+    public static <T extends Comparable<T>> void assertGreater(T less, T actual) {
         assertGreater(null, less, actual);
     }
 
@@ -117,10 +117,10 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is not greater than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is greater.
      */
-    static public <T extends Comparable<T>> void assertNotGreater(String message, T limit, T actual) {
+    public static <T extends Comparable<T>> void assertNotGreater(String message, T limit, T actual) {
         assertNotNull(limit, message);
         assertNotNull(actual, message);
-        if (limit.compareTo(actual) < 0) {
+        if (0 > limit.compareTo(actual)) {
             failNotGreater(message, limit, actual);
         }
     }
@@ -129,53 +129,53 @@ public class ComparableAssert {
      * Asserts that the <tt>actual</tt> object is not greater than the <tt>limit</tt> object. Throws an
      * <tt>AssertionFailedError</tt> if it is greater.
      */
-    static public <T extends Comparable<T>> void assertNotGreater(T limit, T actual) {
+    public static <T extends Comparable<T>> void assertNotGreater(T limit, T actual) {
         assertNotGreater(null, limit, actual);
     }
 
-    static private void failGreater(String message, Object limit, Object actual) {
+    private static void failGreater(String message, Object limit, Object actual) {
         String formatted = "";
-        if (message != null) {
+        if (null != message) {
             formatted = message + " ";
         }
         fail(formatted + "expected greater than:<" + limit + "> but was:<" + actual + ">");
     }
 
-    static private void failNotGreater(String message, Object limit, Object actual) {
+    private static void failNotGreater(String message, Object limit, Object actual) {
         String formatted = "";
-        if (message != null) {
+        if (null != message) {
             formatted = message + " ";
         }
         fail(formatted + "expected not greater than:<" + limit + "> but was:<" + actual + ">");
     }
 
-    static private void failLesser(String message, Object limit, Object actual) {
+    private static void failLesser(String message, Object limit, Object actual) {
         String formatted = "";
-        if (message != null) {
+        if (null != message) {
             formatted = message + " ";
         }
         fail(formatted + "expected lesser than:<" + limit + "> but was:<" + actual + ">");
     }
 
-    static private void failNotLesser(String message, Object limit, Object actual) {
+    private static void failNotLesser(String message, Object limit, Object actual) {
         String formatted = "";
-        if (message != null) {
+        if (null != message) {
             formatted = message + " ";
         }
         fail(formatted + "expected not lesser than:<" + limit + "> but was:<" + actual + ">");
     }
 
-    static private void failNotEquals(String message, Object expected, Object actual) {
+    private static void failNotEquals(String message, Object expected, Object actual) {
         String formatted = "";
-        if (message != null) {
+        if (null != message) {
             formatted = message + " ";
         }
         fail(formatted + "expected equals to:<" + expected + "> but was:<" + actual + ">");
     }
 
-    static private void failEquals(String message, Object expected) {
+    private static void failEquals(String message, Object expected) {
         String formatted = "";
-        if (message != null) {
+        if (null != message) {
             formatted = message + " ";
         }
         fail(formatted + "expected not equals to:<" + expected + ">");

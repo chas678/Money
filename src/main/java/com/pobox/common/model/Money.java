@@ -87,7 +87,7 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      */
     public Money(final Money src) {
         this.amount = src.amount;
-        this.currency = Currency.getInstance(src.currency.getCurrencyCode());
+        this.currency = Currency.getInstance(src.getCurrency().getCurrencyCode());
     }
 
     /**
@@ -238,7 +238,6 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return Boolean int -1 if less than, 1 if greater than and 0 if equal to other
      * @throws ClassCastException       if other is not a Money
      * @throws IllegalArgumentException if other Money is not of the same Currency
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     @Override
     public final int compareTo(final Money otherMoney) {
@@ -257,14 +256,13 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * Money instances must have same currency and amount to be equal.
      *
      * @return boolean
-     * @see java.lang.Object#equals(Object)
      */
     @Override
     public boolean equals(Object otherObject) {
         if (this == otherObject) {
             return true;
         }
-        if (otherObject == null || getClass() != otherObject.getClass()) {
+        if (null == otherObject || getClass() != otherObject.getClass()) {
             return false;
         }
         final Money other = (Money) otherObject;
@@ -278,13 +276,12 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return Boolean True if money is greater than other
      */
     public final boolean greaterThan(final Money other) {
-        return (compareTo(other) > 0);
+        return (0 < compareTo(other));
     }
 
     /**
      * Hash value based on amount.
      *
-     * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
@@ -292,7 +289,7 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     }
 
     public final boolean lessThan(final Money other) {
-        return (compareTo(other) < 0);
+        return (0 > compareTo(other));
     }
 
     /**

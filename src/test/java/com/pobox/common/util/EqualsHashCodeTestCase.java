@@ -15,15 +15,15 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Extend me in order to test a class's functional compliance with the <code>equals</code> and <code>hashCode</code>
+ * Extend me in order to test a class's functional compliance with the {@code equals} and <code>hashCode</code>
  * contract.
  * <p>
  * Override my {@link #createInstance() createInstance} and {@link #createNotEqualInstance() createNotEqualInstance}
  * methods to provide me with objects to test against. Both methods should return objects that are of the same class.
  * <p>
- * <b>WARNING</b>: Extend me only if your class overrides <code>equals</code> to test for equivalence. If your class's
- * <code>equals</code> tests for identity or preserves the behavior from <code>Object</code>, I'm not interested,
- * because I expect <code>createInstance</code> to return equivalent but distinct objects.
+ * <b>WARNING</b>: Extend me only if your class overrides {@code equals} to test for equivalence. If your class's
+ * {@code equals} tests for identity or preserves the behavior from <code>Object</code>, I'm not interested,
+ * because I expect {@code createInstance} to return equivalent but distinct objects.
  *
  * @see Object#equals(Object)
  * @see Object#hashCode()
@@ -83,7 +83,7 @@ public abstract class EqualsHashCodeTestCase {
     }
 
     /**
-     * Tests whether <code>equals</code> holds up against a new <code>Object</code> (should always be <code>false</code>
+     * Tests whether {@code equals} holds up against a new <code>Object</code> (should always be <code>false</code>
      * ).
      */
     @Test
@@ -99,13 +99,13 @@ public abstract class EqualsHashCodeTestCase {
      * Asserts that two objects are not equal. Throws an <tt>AssertionFailedError</tt> if they are equal.
      */
     public void assertNotEquals(Object expected, Object actual) {
-        if ((expected == null && actual == null) || (expected != null && expected.equals(actual))) {
+        if ((null == expected && null == actual) || (null != expected && expected.equals(actual))) {
             fail("expected not equals to: <" + expected + ">");
         }
     }
 
     /**
-     * Tests whether <code>equals</code> holds up against <code>null</code>.
+     * Tests whether {@code equals} holds up against <code>null</code>.
      */
     @Test
     public final void testEqualsAgainstNull() {
@@ -116,7 +116,7 @@ public abstract class EqualsHashCodeTestCase {
     }
 
     /**
-     * Tests whether <code>equals</code> holds up against objects that should not compare equal.
+     * Tests whether {@code equals} holds up against objects that should not compare equal.
      */
     @Test
     public final void testEqualsAgainstUnequalObjects() {
@@ -129,7 +129,7 @@ public abstract class EqualsHashCodeTestCase {
     }
 
     /**
-     * Tests whether <code>equals</code> is <em>consistent</em>.
+     * Tests whether {@code equals} is <em>consistent</em>.
      */
     @RepeatedTest(value = NUM_ITERATIONS, name = RepeatedTest.SHORT_DISPLAY_NAME)
     public final void testEqualsIsConsistentAcrossInvocations() {
@@ -141,7 +141,7 @@ public abstract class EqualsHashCodeTestCase {
     }
 
     /**
-     * Tests whether <code>equals</code> is <em>reflexive</em>.
+     * Tests whether {@code equals} is <em>reflexive</em>.
      */
     @Test
     public final void testEqualsIsReflexive() {
@@ -152,7 +152,7 @@ public abstract class EqualsHashCodeTestCase {
     }
 
     /**
-     * Tests whether <code>equals</code> is <em>symmetric</em> and <em>transitive</em>.
+     * Tests whether {@code equals} is <em>symmetric</em> and <em>transitive</em>.
      */
     @Test
     public final void testEqualsIsSymmetricAndTransitive() {
@@ -165,7 +165,7 @@ public abstract class EqualsHashCodeTestCase {
     }
 
     /**
-     * Tests the <code>hashCode</code> contract.
+     * Tests the {@code hashCode} contract.
      */
     @Test
     public final void testHashCodeContract() {
@@ -175,7 +175,7 @@ public abstract class EqualsHashCodeTestCase {
     }
 
     /**
-     * Tests the consistency of <code>hashCode</code>.
+     * Tests the consistency of {@code hashCode}.
      */
     @Test
     public final void testHashCodeIsConsistentAcrossInvocations() {
@@ -183,7 +183,7 @@ public abstract class EqualsHashCodeTestCase {
         int eq2Hash = eq2.hashCode();
         int eq3Hash = eq3.hashCode();
         int neqHash = neq.hashCode();
-        for (int i = 0; i < NUM_ITERATIONS; ++i) {
+        for (int i = 0; NUM_ITERATIONS > i; ++i) {
             assertEquals(eq1Hash, eq1.hashCode(), "1st equal instance");
             assertEquals(eq2Hash, eq2.hashCode(), "2nd equal instance");
             assertEquals(eq3Hash, eq3.hashCode(), "3rd equal instance");

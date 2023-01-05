@@ -26,10 +26,10 @@
         <maven.source.plugin>2.2.1</maven.source.plugin>
         <maven.surefire.plugin>3.0.0-M6</maven.surefire.plugin>
         <maven.version.range>[3,3.9)</maven.version.range>
-        <mockito.version>4.9.0</mockito.version>
+        <mockito.version>4.11.0</mockito.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <slf4j.version>2.0.4</slf4j.version>
+        <slf4j.version>2.0.5</slf4j.version>
         <sysout.slf4j.version>1.0.2</sysout.slf4j.version>
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
     </properties>

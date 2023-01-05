@@ -1,0 +1,1 @@
+package com.pobox.common.model;

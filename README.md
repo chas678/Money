@@ -30,7 +30,6 @@ ISO4217 codes for currency http://www.xe.com/iso4217.htm
     Money result = aMoney.add(bMoney);
     assert expected.equals(result) : "expected a dollar result after operation";
 
-
 ###Notes on Representing money :
 
 use BigDecimal, int, or long (BigDecimal is the recommended default) the int and long forms represent pennies (or the

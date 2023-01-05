@@ -85,7 +85,7 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
     }
 
     /**
-     * Tests whether <code>sgn(x.compareTo(y)) == -sgn(y.compareTo(x))</code> for all <code>x</code> and <code>y</code>
+     * Tests whether {@code sgn(x.compareTo(y)) == -sgn(y.compareTo(x))} for all <code>x</code> and <code>y</code>
      * given to this test.
      */
     @Test
@@ -99,8 +99,8 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
     }
 
     /**
-     * Tests whether <code>sgn(x.compareTo(z)) == sgn(y.compareTo(z))</code> for all <code>z</code> when
-     * <code>x.compareTo(y) == 0</code>.
+     * Tests whether {@code sgn(x.compareTo(z)) == sgn(y.compareTo(z))} for all <code>z</code> when
+     * {@code x.compareTo(y) == 0}.
      */
     @Test
     public final void testForSameSigns() {
@@ -109,9 +109,9 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
     }
 
     /**
-     * Tests for sensible return values from the class under test's <code>compareTo</code> method. Doing so effectively
-     * tests the transitivity of <code>compareTo</code> also-- <code>(x.compareTo(y)>0 && y.compareTo(z)>0)</code>
-     * implies <code>x.compareTo(z)>0</code>.
+     * Tests for sensible return values from the class under test's {@code compareTo} method. Doing so effectively
+     * tests the transitivity of {@code compareTo} also-- <code>(x.compareTo(y)>0 && y.compareTo(z)>0)</code>
+     * implies {@code x.compareTo(z)>0}.
      */
     @Test
     public final void testReturnValues() {
@@ -138,6 +138,6 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
     // }
 
     private int sgn(int x) {
-        return (x == 0) ? 0 : (x / Math.abs(x));
+        return (0 == x) ? 0 : (x / Math.abs(x));
     }
 }
