@@ -9,29 +9,29 @@
     <description>Money quantity/Value object</description>
 
     <properties>
-        <findbugs.annotations.version>3.0.1</findbugs.annotations.version>
-        <guava.version>31.1-jre</guava.version>
+        <java.version>20</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <guava.version>32.1.2-jre</guava.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <hamcrestjson.version>0.2</hamcrestjson.version>
+        <hamcrestjson.version>0.3</hamcrestjson.version>
+        <jackson.version>2.15.2</jackson.version>
         <jacoco.plugin.version>0.8.8</jacoco.plugin.version>
-        <jackson.version>2.14.1</jackson.version>
-        <java.version>19</java.version>
-        <joda.jackson.version>2.14.1</joda.jackson.version>
-        <logback.version>1.4.5</logback.version>
+        <joda.jackson.version>2.15.2</joda.jackson.version>
+        <junit-jupiter.version>5.10.0</junit-jupiter.version>
+        <logback.version>1.4.8</logback.version>
         <maven.compiler.plugin>3.10.1</maven.compiler.plugin>
         <maven.enforcer.plugin>3.1.0</maven.enforcer.plugin>
-        <maven.jar.plugin>3.2.0</maven.jar.plugin>
+        <maven.jar.plugin>3.2.2</maven.jar.plugin>
         <maven.javadoc.plugin>3.4.0</maven.javadoc.plugin>
         <maven.site.plugin>3.12.0</maven.site.plugin>
         <maven.source.plugin>2.2.1</maven.source.plugin>
-        <maven.surefire.plugin>3.0.0-M6</maven.surefire.plugin>
-        <maven.version.range>[3,3.9)</maven.version.range>
-        <mockito.version>4.11.0</mockito.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <slf4j.version>2.0.5</slf4j.version>
+        <maven.surefire.plugin>3.1.2</maven.surefire.plugin>
+        <maven.version.range>[3,3.9.10)</maven.version.range>
+        <mockito.version>5.4.0</mockito.version>
+        <slf4j.version>2.0.7</slf4j.version>
         <sysout.slf4j.version>1.0.2</sysout.slf4j.version>
-        <junit-jupiter.version>5.9.1</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -120,7 +120,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
@@ -152,8 +152,6 @@
                         <!-- Fail builds with warnings - currently disabled -->
                         <!-- <compilerArgument>-Werror</compilerArgument> -->
                         <compilerArgument>-Xlint:all</compilerArgument>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
                         <release>${java.version}</release>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <compilerArgs>
@@ -213,7 +211,7 @@
                                         <version>${maven.version.range}</version>
                                     </requireMavenVersion>
                                     <requireJavaVersion>
-                                        <version>19</version>
+                                        <version>${java.version}</version>
                                     </requireJavaVersion>
                                 </rules>
                                 <fail>true</fail>

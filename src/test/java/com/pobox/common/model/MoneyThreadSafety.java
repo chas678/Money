@@ -76,8 +76,8 @@ public class MoneyThreadSafety {
             NumberFormat nf1 = aMoney.getFormatter();
             assertThat(nf1.format(aMoney.getAmount().doubleValue()), is("123.45 EUR"));
             assertThat(nf2.format(bMoney.getAmount().doubleValue()), is("11.98 USD"));
-            nf1 = aMoney.getFormatter();
-            assertThat(nf1.format(aMoney.getAmount().doubleValue()), is("123.45 EUR"));
+            NumberFormat nf3 = aMoney.getFormatter();
+            assertThat(nf3.format(aMoney.getAmount().doubleValue()), is("123.45 EUR"));
         }
     }
 }
