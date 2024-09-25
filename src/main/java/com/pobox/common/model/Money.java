@@ -6,6 +6,7 @@ import com.google.common.collect.ComparisonChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -62,6 +63,7 @@ import java.util.stream.IntStream;
  */
 public class Money implements Comparable<Money>, Serializable, Cloneable {
     private static final Logger log = LoggerFactory.getLogger(Money.class);
+    @Serial
     private static final long serialVersionUID = 42L;
     private static final int[] CENTS = {1, 10, 100, 1000};
     /**
