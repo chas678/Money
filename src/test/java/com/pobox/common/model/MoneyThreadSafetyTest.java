@@ -1,5 +1,6 @@
 package com.pobox.common.model;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.text.NumberFormat;
@@ -19,13 +20,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MoneyThreadSafety {
+public class MoneyThreadSafetyTest {
 
     public static void assertConcurrent(final String message, final List<? extends Runnable> runnables,
                                         final int maxTimeoutSeconds) throws InterruptedException {
         final int numThreads = runnables.size();
         final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
-        final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
+        final ExecutorService threadPool = Executors.newVirtualThreadPerTaskExecutor();
         try {
             final CountDownLatch allExecutorThreadsReady = new CountDownLatch(numThreads);
             final CountDownLatch afterInitBlocker = new CountDownLatch(1);
@@ -59,6 +60,7 @@ public class MoneyThreadSafety {
     }
 
     @Test
+    @DisplayName("Money formatter is thread-safe with virtual threads")
     public void testFormatThreadSafe() throws Exception {
         List<MoneyCheck> runners = IntStream.range(0, 1000)
                 .mapToObj(i -> new MoneyCheck())
