@@ -99,11 +99,7 @@ public abstract class EqualsHashCodeTestCase {
      * Asserts that two objects are not equal. Throws an <tt>AssertionFailedError</tt> if they are equal.
      */
     public void assertNotEquals(Object expected, Object actual) {
-        boolean areEqual = switch (expected) {
-            case null -> actual == null;
-            default -> expected.equals(actual);
-        };
-        if (areEqual) {
+        if (null == expected ? null == actual : expected.equals(actual)) {
             fail("expected not equals to: <" + expected + ">");
         }
     }
