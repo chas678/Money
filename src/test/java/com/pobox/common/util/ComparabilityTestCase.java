@@ -138,6 +138,11 @@ public abstract class ComparabilityTestCase<T extends Comparable<T>> {
     // }
 
     private int sgn(int x) {
-        return (0 == x) ? 0 : (x / Math.abs(x));
+        return switch (Integer.signum(x)) {
+            case -1 -> -1;
+            case 0 -> 0;
+            case 1 -> 1;
+            default -> throw new AssertionError("Unexpected signum value");
+        };
     }
 }

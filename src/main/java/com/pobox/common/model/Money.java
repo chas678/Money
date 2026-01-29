@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
  * handles them. Of course, it's still surprising that none of the mainstream base class libraries actually do this. -
  * Martin Fowler
  * <p>
- * ISO4217 c<a href="odes">for currency http://www.</a>xe.com/iso4217.htm
+ * ISO4217 codes for currency <a href="http://www.xe.com/iso4217.htm">http://www.xe.com/iso4217.htm</a>
  * <p>
  * Example Usage:
  * <p>
@@ -61,11 +61,33 @@ import java.util.stream.IntStream;
  * immutable - operations always return new objects, and never modify the state of existing objects the ROUND_HALF_EVEN
  * style of rounding introduces the least bias. It is also called bankers' rounding, or round-to-even.
  */
-public class Money implements Comparable<Money>, Serializable, Cloneable {
+public final class Money implements Comparable<Money>, Serializable, Cloneable {
     private static final Logger log = LoggerFactory.getLogger(Money.class);
     @Serial
     private static final long serialVersionUID = 42L;
     private static final int[] CENTS = {1, 10, 100, 1000};
+
+    /**
+     * Record wrapper for allocation results providing type-safe access to allocated amounts.
+     * Provides a more structured alternative to returning raw Money arrays.
+     *
+     * @param allocations The allocated Money amounts
+     */
+    public record AllocationResult(Money[] allocations) {
+        public AllocationResult {
+            if (allocations == null) {
+                throw new IllegalArgumentException("Allocations cannot be null");
+            }
+        }
+
+        public Money get(int index) {
+            return allocations[index];
+        }
+
+        public int size() {
+            return allocations.length;
+        }
+    }
     /**
      * Amount of money in currency.
      * <p>
@@ -88,8 +110,11 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      *
      */
     public Money(final Money src) {
+        if (src == null) {
+            throw new IllegalArgumentException("Source Money cannot be null");
+        }
         this.amount = src.amount;
-        this.currency = Currency.getInstance(src.getCurrency().getCurrencyCode());
+        this.currency = src.currency;
     }
 
     /**
@@ -98,6 +123,15 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * User defined rounding mode is used - this method is alluded to in Fowlers book if not actually defined there.
      */
     public Money(final BigDecimal amount, final Currency currency, final RoundingMode roundingMode) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null");
+        }
+        if (currency == null) {
+            throw new IllegalArgumentException("Currency cannot be null");
+        }
+        if (roundingMode == null) {
+            throw new IllegalArgumentException("RoundingMode cannot be null");
+        }
         this.currency = currency;
         BigDecimal amt = amount.movePointRight(currency.getDefaultFractionDigits());
         amt = amt.setScale(0, roundingMode);
@@ -114,6 +148,9 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      */
     @JsonCreator
     public Money(@JsonProperty("amount") final double amount, @JsonProperty("currency") final Currency currency) {
+        if (currency == null) {
+            throw new IllegalArgumentException("Currency cannot be null");
+        }
         this.currency = currency;
         this.amount = Math.round(amount * centFactor());
     }
@@ -127,6 +164,9 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * @param currency Currency Money is to be measured in.
      */
     public Money(final long amount, final Currency currency) {
+        if (currency == null) {
+            throw new IllegalArgumentException("Currency cannot be null");
+        }
         this.currency = currency;
         this.amount = amount * centFactor();
     }
@@ -175,6 +215,9 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return Money Array of allocated amounts.
      */
     public final Money[] allocate(final int n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException("Number of allocations must be positive");
+        }
         Money lowResult = newMoney(amount / n);
         Money highResult = newMoney(lowResult.amount + 1);
         Money[] results = new Money[n];
@@ -182,6 +225,16 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
         IntStream.range(0, remainder).forEachOrdered(i -> results[i] = highResult);
         IntStream.range(remainder, n).forEachOrdered(i -> results[i] = lowResult);
         return results;
+    }
+
+    /**
+     * Allocate money among multiple targets without losing CENTS, returning a structured result.
+     *
+     * @param n (number) of pots to allocate to.
+     * @return AllocationResult containing the allocated amounts.
+     */
+    public final AllocationResult allocateToResult(final int n) {
+        return new AllocationResult(allocate(n));
     }
 
     /**
@@ -197,7 +250,13 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return Money Array of allocated amounts.
      */
     public final Money[] allocate(final long... ratios) {
+        if (ratios == null || ratios.length == 0) {
+            throw new IllegalArgumentException("Ratios must not be null or empty");
+        }
         long total = Arrays.stream(ratios).sum();
+        if (total <= 0) {
+            throw new IllegalArgumentException("Sum of ratios must be positive");
+        }
         long remainder = amount;
         Money[] results = new Money[ratios.length];
         for (int i = 0; i < results.length; i++) {
@@ -208,6 +267,16 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
             results[i].amount++;
         }
         return results;
+    }
+
+    /**
+     * Allocate according to prescribed ratios, returning a structured result.
+     *
+     * @param ratios to allocate the remainder to.
+     * @return AllocationResult containing the allocated amounts.
+     */
+    public final AllocationResult allocateToResult(final long... ratios) {
+        return new AllocationResult(allocate(ratios));
     }
 
     /**
@@ -331,7 +400,7 @@ public class Money implements Comparable<Money>, Serializable, Cloneable {
     }
 
     /**
-     * Used to return Money in the same curancy as this one.
+     * Used to return Money in the same currency as this one.
      */
 
     private Money newMoney(final long amount) {
