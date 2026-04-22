@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -155,6 +156,45 @@ public class MoneyTest {
         assertEquals(Money.dollars(-0.02), split[2]);
     }
 
+    @Test
+    public void MoneyLongCtorOverflowFailsLoud() {
+        // KWD has 3 fraction digits → centFactor = 1000. Any whole-currency amount
+        // larger than Long.MAX_VALUE / 1000 silently wraps under the old `amount *
+        // centFactor()` and produces a nonsense Money. Must throw instead.
+        Currency kwd = Currency.getInstance("KWD");
+        long overflowingAmount = Long.MAX_VALUE / 100;
+        assertThrows(ArithmeticException.class, () -> new Money(overflowingAmount, kwd));
+    }
+
+    @Test
+    public void MoneyLongCtorWithinLongRangeIsAllowed() {
+        // Sanity: a value safely within range still constructs.
+        Currency kwd = Currency.getInstance("KWD");
+        Money money = new Money(1_000_000L, kwd);
+        assertEquals(BigDecimal.valueOf(1_000_000_000L, 3), money.getAmount());
+    }
+
+    @Test
+    public void MoneyDoubleCtorRejectsNaN() {
+        Currency usd = Currency.getInstance("USD");
+        Throwable ex = assertThrows(IllegalArgumentException.class, () -> new Money(Double.NaN, usd));
+        assertThat(ex.getMessage(), containsString("NaN"));
+    }
+
+    @Test
+    public void MoneyDoubleCtorRejectsPositiveInfinity() {
+        Currency usd = Currency.getInstance("USD");
+        Throwable ex = assertThrows(IllegalArgumentException.class,
+                () -> new Money(Double.POSITIVE_INFINITY, usd));
+        assertThat(ex.getMessage(), containsString("Infinity"));
+    }
+
+    @Test
+    public void MoneyDoubleCtorRejectsNegativeInfinity() {
+        Currency usd = Currency.getInstance("USD");
+        assertThrows(IllegalArgumentException.class, () -> new Money(Double.NEGATIVE_INFINITY, usd));
+    }
+
     // use ratio allocate to solve Foemmels Conundrum
     @Test
     public void AllocateLongArray() {
@@ -221,6 +261,12 @@ public class MoneyTest {
         Money[] result = Money.dollars(1.00).allocate(1);
         assertEquals(1, result.length);
         assertEquals(Money.dollars(1.00), result[0]);
+    }
+
+    @Test
+    public void AllocationResultRejectsEmptyList() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Money.AllocationResult(List.of()));
     }
 
     @Test

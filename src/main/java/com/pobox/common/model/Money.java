@@ -80,6 +80,9 @@ public final class Money implements Comparable<Money>, Serializable {
             if (allocations == null) {
                 throw new IllegalArgumentException("Allocations cannot be null");
             }
+            if (allocations.isEmpty()) {
+                throw new IllegalArgumentException("Allocations cannot be empty");
+            }
             allocations = List.copyOf(allocations);
         }
 
@@ -177,6 +180,9 @@ public final class Money implements Comparable<Money>, Serializable {
         if (currency == null) {
             throw new IllegalArgumentException("Currency cannot be null");
         }
+        if (!Double.isFinite(amount)) {
+            throw new IllegalArgumentException("Amount must be a finite number, was: " + amount);
+        }
         this.currency = currency;
         this.amount = Math.round(amount * centFactor());
     }
@@ -194,7 +200,9 @@ public final class Money implements Comparable<Money>, Serializable {
             throw new IllegalArgumentException("Currency cannot be null");
         }
         this.currency = currency;
-        this.amount = amount * centFactor();
+        // multiplyExact catches the silent wrap that would otherwise produce a
+        // nonsense Money for currencies with non-trivial centFactor (e.g. KWD = 1000).
+        this.amount = Math.multiplyExact(amount, centFactor());
     }
 
     /**
