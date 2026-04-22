@@ -2,7 +2,6 @@ package com.pobox.common.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ComparisonChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +14,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Currency;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 /**
  * Money class, Represents a monetary value.
@@ -61,7 +60,7 @@ import java.util.stream.IntStream;
  * immutable - operations always return new objects, and never modify the state of existing objects the ROUND_HALF_EVEN
  * style of rounding introduces the least bias. It is also called bankers' rounding, or round-to-even.
  */
-public final class Money implements Comparable<Money>, Serializable, Cloneable {
+public final class Money implements Comparable<Money>, Serializable {
     private static final Logger log = LoggerFactory.getLogger(Money.class);
     @Serial
     private static final long serialVersionUID = 42L;
@@ -69,23 +68,30 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
 
     /**
      * Record wrapper for allocation results providing type-safe access to allocated amounts.
-     * Provides a more structured alternative to returning raw Money arrays.
+     * <p>
+     * Holds an unmodifiable {@link List} (defensively copied at construction) so the
+     * returned allocations cannot be mutated through the accessor — Money is a value
+     * type and its containers should reflect that.
      *
      * @param allocations The allocated Money amounts
      */
-    public record AllocationResult(Money[] allocations) {
+    public record AllocationResult(List<Money> allocations) {
         public AllocationResult {
             if (allocations == null) {
                 throw new IllegalArgumentException("Allocations cannot be null");
             }
+            if (allocations.isEmpty()) {
+                throw new IllegalArgumentException("Allocations cannot be empty");
+            }
+            allocations = List.copyOf(allocations);
         }
 
         public Money get(int index) {
-            return allocations[index];
+            return allocations.get(index);
         }
 
         public int size() {
-            return allocations.length;
+            return allocations.size();
         }
     }
     /**
@@ -95,14 +101,22 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      * <p>
      * -Martin Fowler
      */
-    private long amount;
+    private final long amount;
     /**
      * Currency amount of money is in.
      */
-    private Currency currency;
+    private final Currency currency;
 
-    private Money() {
-        // private no arg constructor
+    /**
+     * Internal raw-minor-units ctor used by {@link #newMoney(long)} and the
+     * arithmetic helpers when the caller has already established the
+     * minor-unit amount. Bypasses the {@code centFactor()} multiplication
+     * the public {@code (long, Currency)} ctor performs. Private so external
+     * callers can't smuggle in unscaled values.
+     */
+    private Money(final Currency currency, final long amount) {
+        this.currency = currency;
+        this.amount = amount;
     }
 
     /**
@@ -139,6 +153,22 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
     }
 
     /**
+     * Creates a new money of the provided amount and currency, used by Jackson when
+     * deserialising Money from JSON. Uses {@link RoundingMode#HALF_EVEN} (banker's
+     * rounding), as the class doc recommends.
+     * <p>
+     * Jackson reads JSON numbers into {@link BigDecimal} from their literal string
+     * representation, so a value such as {@code 0.30} round-trips exactly without
+     * the binary-floating-point loss that the previous {@code double}-based
+     * {@code @JsonCreator} silently introduced — ironic for a Money class.
+     */
+    @JsonCreator
+    public Money(@JsonProperty("amount") final BigDecimal amount,
+                 @JsonProperty("currency") final Currency currency) {
+        this(amount, currency, RoundingMode.HALF_EVEN);
+    }
+
+    /**
      * Creates a new money of the provided amount and currency.
      * <p>
      * Example: new Money( 1.48, Currency.getInstance("USD") )
@@ -146,10 +176,12 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      * @param amount   Amount of Money.
      * @param currency Currency Money is to be measured in - iso4217.
      */
-    @JsonCreator
-    public Money(@JsonProperty("amount") final double amount, @JsonProperty("currency") final Currency currency) {
+    public Money(final double amount, final Currency currency) {
         if (currency == null) {
             throw new IllegalArgumentException("Currency cannot be null");
+        }
+        if (!Double.isFinite(amount)) {
+            throw new IllegalArgumentException("Amount must be a finite number, was: " + amount);
         }
         this.currency = currency;
         this.amount = Math.round(amount * centFactor());
@@ -168,7 +200,9 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
             throw new IllegalArgumentException("Currency cannot be null");
         }
         this.currency = currency;
-        this.amount = amount * centFactor();
+        // multiplyExact catches the silent wrap that would otherwise produce a
+        // nonsense Money for currencies with non-trivial centFactor (e.g. KWD = 1000).
+        this.amount = Math.multiplyExact(amount, centFactor());
     }
 
     /**
@@ -216,14 +250,20 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      */
     public final Money[] allocate(final int n) {
         if (n <= 0) {
-            throw new IllegalArgumentException("Number of allocations must be positive");
+            throw new IllegalArgumentException("Number of allocations must be positive, was: " + n);
         }
-        Money lowResult = newMoney(amount / n);
-        Money highResult = newMoney(lowResult.amount + 1);
+        // Operate on the magnitude so the "leftover minor units" go to the first |remainder|
+        // slots regardless of sign — and so amounts > Integer.MAX_VALUE minor units don't
+        // get silently truncated by an int-cast remainder.
+        long absAmount = Math.absExact(amount);
+        long step = Long.signum(amount);
+        long absLow = absAmount / n;
+        int absRemainder = (int) (absAmount % n);
+        Money lowMoney = newMoney(step * absLow);
+        Money highMoney = newMoney(step * (absLow + 1));
         Money[] results = new Money[n];
-        int remainder = (int) amount % n;
-        IntStream.range(0, remainder).forEachOrdered(i -> results[i] = highResult);
-        IntStream.range(remainder, n).forEachOrdered(i -> results[i] = lowResult);
+        Arrays.fill(results, 0, absRemainder, highMoney);
+        Arrays.fill(results, absRemainder, n, lowMoney);
         return results;
     }
 
@@ -234,37 +274,78 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return AllocationResult containing the allocated amounts.
      */
     public final AllocationResult allocateToResult(final int n) {
-        return new AllocationResult(allocate(n));
+        return new AllocationResult(Arrays.asList(allocate(n)));
     }
 
     /**
-     * Allocate according to prescribed ratios. The base amounts are allocated by simple division, rounding down. So the
-     * allocated amount will always be less than or equal to the total.
+     * Allocate according to prescribed ratios. The base amounts are allocated by
+     * truncating division ({@code amount * ratios[i] / total}) and the leftover
+     * minor units are spread across the first slots so that the slot sum equals
+     * the original amount exactly.
      * <p>
-     * Remainder contains the unallocated amount. Which will always be a whole number less than 'i'. So simply gives
-     * each receiver 1 until the money is gone.
+     * Sign-aware: the per-slot adjustment is {@code Long.signum(remainder)}, so the
+     * leftover is distributed with the same sign as the source. For positive
+     * amounts each of the first {@code |remainder|} slots gets +1 minor unit; for
+     * negative amounts each gets -1. Slots with a zero ratio always allocate to
+     * exactly zero.
      * <p>
-     * For example, $100 allocated by the "ratios" (1, 1, 1) would yield ($34, $33, $33).
+     * For example, $100.00 allocated by the ratios (1, 1, 1) yields ($33.34, $33.33, $33.33);
+     * -$1.00 by (1, 1, 1) yields (-$0.34, -$0.33, -$0.33).
+     * <p>
+     * Throws {@link ArithmeticException} if {@code amount * ratios[i]} or the sum of
+     * ratios overflows {@code long}, and {@link IllegalArgumentException} if any
+     * ratio is negative or the ratios array is null/empty/sums-to-zero.
      *
-     * @param ratios to allocate the remainder to.
-     * @return Money Array of allocated amounts.
+     * @param ratios non-negative ratios to allocate by; must not be null/empty and
+     *               must sum to a positive value.
+     * @return Money Array of allocated amounts; sums to exactly the source amount.
      */
     public final Money[] allocate(final long... ratios) {
         if (ratios == null || ratios.length == 0) {
-            throw new IllegalArgumentException("Ratios must not be null or empty");
+            throw new IllegalArgumentException("Ratios array must not be null or empty");
         }
-        long total = Arrays.stream(ratios).sum();
-        if (total <= 0) {
-            throw new IllegalArgumentException("Sum of ratios must be positive");
+        long total = 0;
+        for (int i = 0; i < ratios.length; i++) {
+            long ratio = ratios[i];
+            if (ratio < 0) {
+                throw new IllegalArgumentException(
+                        "Ratios must be non-negative, but ratios[" + i + "] = " + ratio);
+            }
+            try {
+                total = Math.addExact(total, ratio);
+            } catch (ArithmeticException e) {
+                throw new ArithmeticException(
+                        "Sum of ratios overflowed long at index " + i
+                                + " (running total " + total + " + " + ratio + ")");
+            }
         }
-        long remainder = amount;
+        if (total == 0) {
+            throw new IllegalArgumentException("Sum of ratios must be positive, was zero");
+        }
+
+        long[] base = new long[ratios.length];
+        long allocated = 0;
+        for (int i = 0; i < ratios.length; i++) {
+            try {
+                // multiplyExact catches the silent overflow of `amount * ratios[i]`.
+                base[i] = Math.multiplyExact(amount, ratios[i]) / total;
+            } catch (ArithmeticException e) {
+                throw new ArithmeticException(
+                        "Allocation overflowed long at index " + i
+                                + " (amount " + amount + " * ratio " + ratios[i] + ")");
+            }
+            allocated += base[i];
+        }
+        long remainder = amount - allocated;
+        long step = Long.signum(remainder);
+        long absRemainder = Math.abs(remainder);
+
         Money[] results = new Money[ratios.length];
-        for (int i = 0; i < results.length; i++) {
-            results[i] = newMoney(amount * ratios[i] / total);
-            remainder -= results[i].amount;
-        }
-        for (int i = 0; i < remainder; i++) {
-            results[i].amount++;
+        for (int i = 0; i < ratios.length; i++) {
+            long extra = (i < absRemainder) ? step : 0;
+            // Build a fresh Money rather than mutating the field on a previously
+            // returned instance — keeps the immutable value-type contract intact.
+            results[i] = newMoney(base[i] + extra);
         }
         return results;
     }
@@ -276,7 +357,7 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return AllocationResult containing the allocated amounts.
      */
     public final AllocationResult allocateToResult(final long... ratios) {
-        return new AllocationResult(allocate(ratios));
+        return new AllocationResult(Arrays.asList(allocate(ratios)));
     }
 
     /**
@@ -292,10 +373,12 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      */
     private void assertSameCurrencyAs(final Money arg) {
         if (null == arg) {
-            throw new IllegalArgumentException("Cannot compare money to null.");
+            throw new IllegalArgumentException("Money argument cannot be null");
         }
         if (!currency.equals(arg.getCurrency())) {
-            throw new IllegalArgumentException("Cannot compare different currencies.");
+            throw new IllegalArgumentException(
+                    "Currency mismatch: " + currency.getCurrencyCode()
+                            + " vs " + arg.getCurrency().getCurrencyCode());
         }
     }
 
@@ -313,7 +396,7 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
     @Override
     public final int compareTo(final Money otherMoney) {
         assertSameCurrencyAs(otherMoney);
-        return ComparisonChain.start().compare(this.amount, otherMoney.amount).result();
+        return Long.compare(this.amount, otherMoney.amount);
     }
 
     /**
@@ -404,10 +487,7 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      */
 
     private Money newMoney(final long amount) {
-        Money money = new Money();
-        money.currency = currency;
-        money.amount = amount;
-        return money;
+        return new Money(this.currency, amount);
     }
 
     /**
@@ -447,16 +527,11 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
     }
 
     /**
-     * Deep copy/clone.
+     * Deep copy.
      *
-     * @return a new Money like this one.
+     * @return a new Money equal to this one.
      */
     public final Money deepCopy() {
-        return clone();
-    }
-
-    @Override
-    public final Money clone() {
         return new Money(this);
     }
 }
