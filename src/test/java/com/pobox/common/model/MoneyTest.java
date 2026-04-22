@@ -205,6 +205,62 @@ public class MoneyTest {
     }
 
     @Test
+    public void AllocateRatiosNegativeAmountConservesTotal() {
+        // The headline allocate(long...) fix uses Long.signum(remainder) for sign-aware
+        // remainder distribution; without this test, only allocate(int) has direct
+        // negative-amount conservation coverage.
+        Money debit = Money.dollars(-2.50);
+        Money[] split = debit.allocate(new long[]{2L, 1L, 1L});
+        Money sum = Arrays.stream(split).reduce(Money.dollars(0), Money::add);
+        assertEquals(Money.dollars(-2.50), sum);
+    }
+
+    @Test
+    public void AllocateRatiosNegativeAmountAllSlotsHaveExpectedSign() {
+        // No slot may flip sign relative to the source; positive=>non-negative,
+        // negative=>non-positive (a slot may be exactly zero where the ratio is zero).
+        Money debit = Money.dollars(-1.00);
+        Money[] split = debit.allocate(new long[]{1L, 1L, 1L});
+        Money zero = Money.dollars(0);
+        for (Money m : split) {
+            assertFalse(m.greaterThan(zero), "no slot may flip to positive when source is negative");
+        }
+    }
+
+    @Test
+    public void AllocateIntOnZeroAmountReturnsZeroSlots() {
+        // Long.signum(0) == 0 path: both lowMoney and highMoney become 0;
+        // every slot must be exactly zero and the call must not throw.
+        Money[] split = Money.dollars(0).allocate(5);
+        assertEquals(5, split.length);
+        for (Money m : split) {
+            assertEquals(Money.dollars(0), m);
+        }
+    }
+
+    @Test
+    public void AllocateRatiosOnZeroAmountReturnsZeroSlots() {
+        // amount=0 => every base[i]=0, remainder=0, step=0, no extras distributed.
+        Money[] split = Money.dollars(0).allocate(new long[]{1L, 2L, 3L});
+        assertEquals(3, split.length);
+        for (Money m : split) {
+            assertEquals(Money.dollars(0), m);
+        }
+    }
+
+    @Test
+    public void AllocationResultDefensiveCopiesInput() {
+        // Pin the List.copyOf defensive-copy half of the bug-5 fix: mutating the
+        // *input* list after construction must not affect the record's state. The
+        // existing AllocationResultIsImmutable test only covers the *output* side.
+        java.util.ArrayList<Money> input = new java.util.ArrayList<>(List.of(
+                Money.dollars(0.34), Money.dollars(0.33), Money.dollars(0.33)));
+        Money.AllocationResult result = new Money.AllocationResult(input);
+        input.set(0, Money.dollars(99.99));
+        assertEquals(Money.dollars(0.34), result.get(0));
+    }
+
+    @Test
     public void AllocateRatiosOverflowFailsLoud() {
         // amount * ratios[0] overflows long — must throw, not wrap silently.
         Money big = new Money(BigDecimal.valueOf(Long.MAX_VALUE / 1_000L, 2),
@@ -528,30 +584,65 @@ public class MoneyTest {
     }
 
     @Test
-    public void JsonRoundTripPreservesExactValueAtLargeAmounts() throws Exception {
-        // Sufficiently large to exceed double's 53-bit mantissa: round-tripping the
-        // amount through a double-based @JsonCreator silently lost precision and the
-        // returned Money would not equal the original. With BigDecimal it survives.
-        Money original = new Money(new BigDecimal("999999999999999.99"),
-                Currency.getInstance("USD"),
-                RoundingMode.UNNECESSARY);
+    public void JsonDeserialisesPrecisionThatDoubleWouldLose() throws Exception {
+        // Literal JSON string — does NOT go through writeValueAsString, so the test
+        // can't tautologically agree with itself. 999999999999999.99 exceeds double's
+        // 53-bit mantissa; reading it via the BigDecimal @JsonCreator must preserve
+        // every digit, where a double-based ctor would silently round.
         JsonMapper mapper = JsonMapper.builder().build();
-        String json = mapper.writeValueAsString(original);
-        Money roundTripped = mapper.readValue(json, Money.class);
-        assertEquals(original, roundTripped);
-        assertEquals(new BigDecimal("999999999999999.99"), roundTripped.getAmount());
+        Money money = mapper.readValue(
+                "{\"amount\":999999999999999.99,\"currency\":\"USD\"}", Money.class);
+        assertEquals(new BigDecimal("999999999999999.99"), money.getAmount());
     }
 
     @Test
-    public void JsonRoundTripPreservesSmallExactValue() throws Exception {
-        Money original = new Money(new BigDecimal("0.30"),
-                Currency.getInstance("USD"),
-                RoundingMode.UNNECESSARY);
+    public void JsonDeserialisesSmallExactValue() throws Exception {
+        JsonMapper mapper = JsonMapper.builder().build();
+        Money money = mapper.readValue(
+                "{\"amount\":0.30,\"currency\":\"USD\"}", Money.class);
+        assertEquals(new BigDecimal("0.30"), money.getAmount());
+    }
+
+    @Test
+    public void JsonDeserialisesIntegerLiteral() throws Exception {
+        // No decimal point in the JSON literal — Jackson must still pick the
+        // BigDecimal @JsonCreator and produce the right minor-unit count.
+        JsonMapper mapper = JsonMapper.builder().build();
+        Money money = mapper.readValue(
+                "{\"amount\":100,\"currency\":\"USD\"}", Money.class);
+        assertEquals(Money.dollars(100.00), money);
+    }
+
+    @Test
+    public void JsonDeserialisesScientificNotation() throws Exception {
+        // Jackson is allowed to emit/accept scientific notation; ensure it parses
+        // into BigDecimal (not double) on the read path.
+        JsonMapper mapper = JsonMapper.builder().build();
+        Money money = mapper.readValue(
+                "{\"amount\":1.0E2,\"currency\":\"USD\"}", Money.class);
+        assertEquals(Money.dollars(100.00), money);
+    }
+
+    @Test
+    public void JsonDeserialisesNullAmountPropagatesIllegalArgumentException() {
+        // The @JsonCreator delegates to Money(BigDecimal, Currency, RoundingMode)
+        // which rejects null amount. Make sure Jackson surfaces that rather than
+        // swallowing it or accepting null silently.
+        JsonMapper mapper = JsonMapper.builder().build();
+        assertThrows(Exception.class,
+                () -> mapper.readValue("{\"amount\":null,\"currency\":\"USD\"}", Money.class));
+    }
+
+    @Test
+    public void JsonRoundTripPreservesValue() throws Exception {
+        // One smoke test on the serialise side, intentionally separate from the
+        // deserialisation tests above — they test different things.
+        Money original = new Money(new BigDecimal("12.34"),
+                Currency.getInstance("USD"), RoundingMode.UNNECESSARY);
         JsonMapper mapper = JsonMapper.builder().build();
         String json = mapper.writeValueAsString(original);
         Money roundTripped = mapper.readValue(json, Money.class);
         assertEquals(original, roundTripped);
-        assertEquals(new BigDecimal("0.30"), roundTripped.getAmount());
     }
 
 }
