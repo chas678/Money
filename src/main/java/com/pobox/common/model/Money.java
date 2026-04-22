@@ -98,14 +98,22 @@ public final class Money implements Comparable<Money>, Serializable {
      * <p>
      * -Martin Fowler
      */
-    private long amount;
+    private final long amount;
     /**
      * Currency amount of money is in.
      */
-    private Currency currency;
+    private final Currency currency;
 
-    private Money() {
-        // private no arg constructor
+    /**
+     * Internal raw-minor-units ctor used by {@link #newMoney(long)} and the
+     * arithmetic helpers when the caller has already established the
+     * minor-unit amount. Bypasses the {@code centFactor()} multiplication
+     * the public {@code (long, Currency)} ctor performs. Private so external
+     * callers can't smuggle in unscaled values.
+     */
+    private Money(final Currency currency, final long amount) {
+        this.currency = currency;
+        this.amount = amount;
     }
 
     /**
@@ -444,10 +452,7 @@ public final class Money implements Comparable<Money>, Serializable {
      */
 
     private Money newMoney(final long amount) {
-        Money money = new Money();
-        money.currency = currency;
-        money.amount = amount;
-        return money;
+        return new Money(this.currency, amount);
     }
 
     /**
