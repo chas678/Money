@@ -16,7 +16,6 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 /**
  * Money class, Represents a monetary value.
@@ -218,12 +217,18 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
         if (n <= 0) {
             throw new IllegalArgumentException("Number of allocations must be positive");
         }
-        Money lowResult = newMoney(amount / n);
-        Money highResult = newMoney(lowResult.amount + 1);
+        // Operate on the magnitude so the "leftover minor units" go to the first |remainder|
+        // slots regardless of sign — and so amounts > Integer.MAX_VALUE minor units don't
+        // get silently truncated by an int-cast remainder.
+        long absAmount = Math.absExact(amount);
+        long step = Long.signum(amount);
+        long absLow = absAmount / n;
+        int absRemainder = (int) (absAmount % n);
+        Money lowMoney = newMoney(step * absLow);
+        Money highMoney = newMoney(step * (absLow + 1));
         Money[] results = new Money[n];
-        int remainder = (int) amount % n;
-        IntStream.range(0, remainder).forEachOrdered(i -> results[i] = highResult);
-        IntStream.range(remainder, n).forEachOrdered(i -> results[i] = lowResult);
+        Arrays.fill(results, 0, absRemainder, highMoney);
+        Arrays.fill(results, absRemainder, n, lowMoney);
         return results;
     }
 

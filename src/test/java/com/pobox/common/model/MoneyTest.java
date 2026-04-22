@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.Locale;
 
@@ -101,6 +102,54 @@ public class MoneyTest {
         assertEquals(Money.dollars(0.03), monies[0]);
         assertEquals(Money.dollars(0.03), monies[1]);
         assertEquals(Money.dollars(0.03), monies[2]);
+    }
+
+    @Test
+    public void AllocateIntDoesNotTruncateAmountToInt() {
+        // 8_589_934_599 minor units = 2^33 + 7, well past Integer.MAX_VALUE.
+        // Construct via the BigDecimal ctor so the value lands exactly in the long
+        // amount field — bypassing the (long, Currency) ctor's centFactor multiplier.
+        long minorUnits = (1L << 33) + 7L; // 8_589_934_599
+        Money huge = new Money(BigDecimal.valueOf(minorUnits, 2),
+                Currency.getInstance("USD"),
+                RoundingMode.UNNECESSARY);
+        Money[] split = huge.allocate(10);
+
+        long sum = Arrays.stream(split)
+                .mapToLong(m -> m.getAmount().movePointRight(2).longValueExact())
+                .sum();
+        assertEquals(minorUnits, sum, "allocate must conserve total amount");
+
+        long high = minorUnits / 10 + 1;
+        long low = minorUnits / 10;
+        long expectedHighCount = minorUnits % 10; // 9
+        long highCount = Arrays.stream(split)
+                .filter(m -> m.getAmount().movePointRight(2).longValueExact() == high)
+                .count();
+        assertEquals(expectedHighCount, highCount);
+        long lowCount = Arrays.stream(split)
+                .filter(m -> m.getAmount().movePointRight(2).longValueExact() == low)
+                .count();
+        assertEquals(10 - expectedHighCount, lowCount);
+    }
+
+    @Test
+    public void AllocateIntNegativeAmountConservesTotal() {
+        Money debit = Money.dollars(-0.05);
+        Money[] split = debit.allocate(2);
+        Money sum = Arrays.stream(split).reduce(Money.dollars(0), Money::add);
+        assertEquals(Money.dollars(-0.05), sum);
+    }
+
+    @Test
+    public void AllocateIntNegativeAmountDistributesRemainderConsistently() {
+        // -$0.08 / 3: low=-3, high=-2; "first slots get the larger share" semantics
+        // mean the first 2 slots are -0.03 (more-negative), the last is -0.02.
+        Money debit = Money.dollars(-0.08);
+        Money[] split = debit.allocate(3);
+        assertEquals(Money.dollars(-0.03), split[0]);
+        assertEquals(Money.dollars(-0.03), split[1]);
+        assertEquals(Money.dollars(-0.02), split[2]);
     }
 
     // use ratio allocate to solve Foemmels Conundrum
