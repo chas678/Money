@@ -142,6 +142,22 @@ public final class Money implements Comparable<Money>, Serializable {
     }
 
     /**
+     * Creates a new money of the provided amount and currency, used by Jackson when
+     * deserialising Money from JSON. Uses {@link RoundingMode#HALF_EVEN} (banker's
+     * rounding), as the class doc recommends.
+     * <p>
+     * Jackson reads JSON numbers into {@link BigDecimal} from their literal string
+     * representation, so a value such as {@code 0.30} round-trips exactly without
+     * the binary-floating-point loss that the previous {@code double}-based
+     * {@code @JsonCreator} silently introduced — ironic for a Money class.
+     */
+    @JsonCreator
+    public Money(@JsonProperty("amount") final BigDecimal amount,
+                 @JsonProperty("currency") final Currency currency) {
+        this(amount, currency, RoundingMode.HALF_EVEN);
+    }
+
+    /**
      * Creates a new money of the provided amount and currency.
      * <p>
      * Example: new Money( 1.48, Currency.getInstance("USD") )
@@ -149,8 +165,7 @@ public final class Money implements Comparable<Money>, Serializable {
      * @param amount   Amount of Money.
      * @param currency Currency Money is to be measured in - iso4217.
      */
-    @JsonCreator
-    public Money(@JsonProperty("amount") final double amount, @JsonProperty("currency") final Currency currency) {
+    public Money(final double amount, final Currency currency) {
         if (currency == null) {
             throw new IllegalArgumentException("Currency cannot be null");
         }

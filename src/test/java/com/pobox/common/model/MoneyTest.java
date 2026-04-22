@@ -1,5 +1,6 @@
 package com.pobox.common.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -478,6 +479,33 @@ public class MoneyTest {
         Money aMon = aMoney.deepCopy();
         assertThat(aMon, is(not(sameInstance(aMoney))));
         assertThat(aMon, is(equalTo(aMoney)));
+    }
+
+    @Test
+    public void JsonRoundTripPreservesExactValueAtLargeAmounts() throws Exception {
+        // Sufficiently large to exceed double's 53-bit mantissa: round-tripping the
+        // amount through a double-based @JsonCreator silently lost precision and the
+        // returned Money would not equal the original. With BigDecimal it survives.
+        Money original = new Money(new BigDecimal("999999999999999.99"),
+                Currency.getInstance("USD"),
+                RoundingMode.UNNECESSARY);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(original);
+        Money roundTripped = mapper.readValue(json, Money.class);
+        assertEquals(original, roundTripped);
+        assertEquals(new BigDecimal("999999999999999.99"), roundTripped.getAmount());
+    }
+
+    @Test
+    public void JsonRoundTripPreservesSmallExactValue() throws Exception {
+        Money original = new Money(new BigDecimal("0.30"),
+                Currency.getInstance("USD"),
+                RoundingMode.UNNECESSARY);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(original);
+        Money roundTripped = mapper.readValue(json, Money.class);
+        assertEquals(original, roundTripped);
+        assertEquals(new BigDecimal("0.30"), roundTripped.getAmount());
     }
 
 }
