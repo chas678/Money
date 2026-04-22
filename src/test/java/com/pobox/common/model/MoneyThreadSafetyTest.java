@@ -22,6 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MoneyThreadSafetyTest {
 
+    public MoneyThreadSafetyTest() {
+        // The runnables below format Money using the JVM default locale; assertions
+        // expect a dot decimal separator. Pin to Locale.US so the test does not
+        // depend on the developer's machine locale or on test-execution order vs
+        // MoneyTest (which also sets this).
+        Locale.setDefault(Locale.US);
+    }
+
     public static void assertConcurrent(final String message, final List<? extends Runnable> runnables,
                                         final int maxTimeoutSeconds) throws InterruptedException {
         final int numThreads = runnables.size();
