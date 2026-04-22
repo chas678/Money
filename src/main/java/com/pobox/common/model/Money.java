@@ -60,7 +60,7 @@ import java.util.Objects;
  * immutable - operations always return new objects, and never modify the state of existing objects the ROUND_HALF_EVEN
  * style of rounding introduces the least bias. It is also called bankers' rounding, or round-to-even.
  */
-public final class Money implements Comparable<Money>, Serializable, Cloneable {
+public final class Money implements Comparable<Money>, Serializable {
     private static final Logger log = LoggerFactory.getLogger(Money.class);
     @Serial
     private static final long serialVersionUID = 42L;
@@ -472,16 +472,11 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
     }
 
     /**
-     * Deep copy/clone.
+     * Deep copy.
      *
-     * @return a new Money like this one.
+     * @return a new Money equal to this one.
      */
     public final Money deepCopy() {
-        return clone();
-    }
-
-    @Override
-    public final Money clone() {
         return new Money(this);
     }
 }
