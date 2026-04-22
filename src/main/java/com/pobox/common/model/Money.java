@@ -1,6 +1,7 @@
 package com.pobox.common.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -362,7 +363,16 @@ public final class Money implements Comparable<Money>, Serializable {
 
     /**
      * Amount accessor.
+     * <p>
+     * Serialised to JSON as a quoted string ({@code "329.15"}, not {@code 329.15})
+     * to avoid IEEE-754 truncation on the wire — most JSON parsers (JS, Python,
+     * Go's defaults) decode JSON numbers into doubles, which would silently
+     * reintroduce the binary-FP rounding this class exists to avoid. Jackson
+     * remains lenient on input: {@code @JsonCreator} accepts both string and
+     * numeric JSON forms via the default {@link BigDecimal} coercion, so
+     * older payloads still parse.
      */
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     public final BigDecimal getAmount() {
         return BigDecimal.valueOf(amount, currency.getDefaultFractionDigits());
     }
