@@ -1,8 +1,8 @@
 package com.pobox.common.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -489,7 +489,7 @@ public class MoneyTest {
         Money original = new Money(new BigDecimal("999999999999999.99"),
                 Currency.getInstance("USD"),
                 RoundingMode.UNNECESSARY);
-        ObjectMapper mapper = new ObjectMapper();
+        JsonMapper mapper = JsonMapper.builder().build();
         String json = mapper.writeValueAsString(original);
         Money roundTripped = mapper.readValue(json, Money.class);
         assertEquals(original, roundTripped);
@@ -501,7 +501,7 @@ public class MoneyTest {
         Money original = new Money(new BigDecimal("0.30"),
                 Currency.getInstance("USD"),
                 RoundingMode.UNNECESSARY);
-        ObjectMapper mapper = new ObjectMapper();
+        JsonMapper mapper = JsonMapper.builder().build();
         String json = mapper.writeValueAsString(original);
         Money roundTripped = mapper.readValue(json, Money.class);
         assertEquals(original, roundTripped);
