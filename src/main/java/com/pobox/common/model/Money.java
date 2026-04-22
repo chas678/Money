@@ -2,7 +2,6 @@ package com.pobox.common.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ComparisonChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -339,7 +338,7 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
     @Override
     public final int compareTo(final Money otherMoney) {
         assertSameCurrencyAs(otherMoney);
-        return ComparisonChain.start().compare(this.amount, otherMoney.amount).result();
+        return Long.compare(this.amount, otherMoney.amount);
     }
 
     /**
