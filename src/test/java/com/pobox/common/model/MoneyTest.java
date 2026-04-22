@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Currency;
+import java.util.List;
 import java.util.Locale;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -219,6 +220,25 @@ public class MoneyTest {
         Money[] result = Money.dollars(1.00).allocate(1);
         assertEquals(1, result.length);
         assertEquals(Money.dollars(1.00), result[0]);
+    }
+
+    @Test
+    public void AllocationResultIsImmutable() {
+        Money source = Money.dollars(1.00);
+        Money.AllocationResult result = source.allocateToResult(3);
+        List<Money> list = result.allocations();
+        assertThrows(UnsupportedOperationException.class, () -> list.set(0, null));
+        assertThrows(UnsupportedOperationException.class, () -> list.add(Money.dollars(0)));
+    }
+
+    @Test
+    public void AllocationResultRoundtripsThroughGet() {
+        Money source = Money.dollars(1.00);
+        Money.AllocationResult result = source.allocateToResult(3);
+        assertEquals(3, result.size());
+        assertEquals(Money.dollars(0.34), result.get(0));
+        assertEquals(Money.dollars(0.33), result.get(1));
+        assertEquals(Money.dollars(0.33), result.get(2));
     }
 
     @Test

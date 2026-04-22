@@ -15,6 +15,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Currency;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -68,23 +69,27 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
 
     /**
      * Record wrapper for allocation results providing type-safe access to allocated amounts.
-     * Provides a more structured alternative to returning raw Money arrays.
+     * <p>
+     * Holds an unmodifiable {@link List} (defensively copied at construction) so the
+     * returned allocations cannot be mutated through the accessor — Money is a value
+     * type and its containers should reflect that.
      *
      * @param allocations The allocated Money amounts
      */
-    public record AllocationResult(Money[] allocations) {
+    public record AllocationResult(List<Money> allocations) {
         public AllocationResult {
             if (allocations == null) {
                 throw new IllegalArgumentException("Allocations cannot be null");
             }
+            allocations = List.copyOf(allocations);
         }
 
         public Money get(int index) {
-            return allocations[index];
+            return allocations.get(index);
         }
 
         public int size() {
-            return allocations.length;
+            return allocations.size();
         }
     }
     /**
@@ -239,7 +244,7 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return AllocationResult containing the allocated amounts.
      */
     public final AllocationResult allocateToResult(final int n) {
-        return new AllocationResult(allocate(n));
+        return new AllocationResult(Arrays.asList(allocate(n)));
     }
 
     /**
@@ -297,7 +302,7 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
      * @return AllocationResult containing the allocated amounts.
      */
     public final AllocationResult allocateToResult(final long... ratios) {
-        return new AllocationResult(allocate(ratios));
+        return new AllocationResult(Arrays.asList(allocate(ratios)));
     }
 
     /**
