@@ -653,4 +653,48 @@ public class MoneyTest {
         assertEquals(original, roundTripped);
     }
 
+    @Test
+    public void JsonDeserialisesAmountFromString() throws Exception {
+        // The new wire format quotes amount as a string. Read path must accept it.
+        JsonMapper mapper = JsonMapper.builder().build();
+        Money money = mapper.readValue(
+                "{\"amount\":\"329.15\",\"currency\":\"USD\"}", Money.class);
+        assertEquals(new BigDecimal("329.15"), money.getAmount());
+    }
+
+    @Test
+    public void JsonDeserialisesAmountFromNumberForBackwardCompat() throws Exception {
+        // The new wire format quotes amount as a string, but old producers may
+        // still emit a JSON number. Lenient-input contract: both must parse.
+        JsonMapper mapper = JsonMapper.builder().build();
+        Money money = mapper.readValue(
+                "{\"amount\":329.15,\"currency\":\"USD\"}", Money.class);
+        assertEquals(new BigDecimal("329.15"), money.getAmount());
+    }
+
+    @Test
+    public void JsonDeserialisesPrecisionFromStringPastDoublePrecision() throws Exception {
+        // The motivating reason for the wire-format switch: a JS / Python / Go
+        // consumer that decodes JSON numbers as doubles would corrupt this value.
+        // As a string, the value survives end-to-end intact.
+        JsonMapper mapper = JsonMapper.builder().build();
+        Money money = mapper.readValue(
+                "{\"amount\":\"999999999999999.99\",\"currency\":\"USD\"}", Money.class);
+        assertEquals(new BigDecimal("999999999999999.99"), money.getAmount());
+    }
+
+    @Test
+    public void JsonSerialisesAmountAsString() throws Exception {
+        // Money emits `amount` as a JSON STRING, not a JSON number. JSON numbers
+        // are IEEE-754 doubles in every default parser (JS, Python, Go), so a
+        // wire-format number reintroduces the binary-FP error this class exists
+        // to avoid. Asserting the literal substring with quotes proves the
+        // string form, not the number form.
+        Money money = new Money(new BigDecimal("329.15"),
+                Currency.getInstance("USD"), RoundingMode.UNNECESSARY);
+        JsonMapper mapper = JsonMapper.builder().build();
+        String json = mapper.writeValueAsString(money);
+        assertThat(json, containsString("\"amount\":\"329.15\""));
+    }
+
 }
