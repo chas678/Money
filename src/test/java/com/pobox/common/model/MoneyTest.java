@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -159,6 +160,65 @@ public class MoneyTest {
         Money[] result = Money.dollars(0.05).allocate(allocation);
         assertEquals(Money.dollars(0.02), result[0]);
         assertEquals(Money.dollars(0.03), result[1]);
+    }
+
+    @Test
+    public void AllocateRatiosOverflowFailsLoud() {
+        // amount * ratios[0] overflows long — must throw, not wrap silently.
+        Money big = new Money(BigDecimal.valueOf(Long.MAX_VALUE / 1_000L, 2),
+                Currency.getInstance("USD"),
+                RoundingMode.UNNECESSARY);
+        long[] ratios = {1_000_000L, 1L};
+        assertThrows(ArithmeticException.class, () -> big.allocate(ratios));
+    }
+
+    @Test
+    public void AllocateRatiosSumOverflowFailsLoud() {
+        // Sum of ratios overflows long — must throw, not wrap silently.
+        long[] ratios = {Long.MAX_VALUE, 1L};
+        assertThrows(ArithmeticException.class, () -> Money.dollars(1.00).allocate(ratios));
+    }
+
+    @Test
+    public void AllocateRatiosRejectsNegativeRatio() {
+        long[] ratios = {1L, -1L, 1L};
+        assertThrows(IllegalArgumentException.class, () -> Money.dollars(1.00).allocate(ratios));
+    }
+
+    @Test
+    public void AllocateRatiosReturnsIndependentInstances() {
+        Money source = Money.dollars(1.00);
+        Money[] a = source.allocate(new long[]{1L, 1L, 1L});
+        Money[] b = source.allocate(new long[]{1L, 1L, 1L});
+        assertEquals(a[0], b[0]);
+        assertNotSame(a[0], b[0]);
+        // No two slots in one allocation may alias the same Money instance — protects
+        // the value-type contract that older `results[i].amount++` code violated.
+        for (int i = 0; i < a.length; i++) {
+            for (int j = i + 1; j < a.length; j++) {
+                assertNotSame(a[i], a[j], "result slots must be independent instances");
+            }
+        }
+    }
+
+    @Test
+    public void AllocateRatiosWithZeroRatioGivesZeroSlot() {
+        Money[] result = Money.dollars(1.00).allocate(new long[]{0L, 1L, 1L});
+        assertEquals(Money.dollars(0), result[0]);
+    }
+
+    @Test
+    public void AllocateRatiosSingleRatioGivesFullAmount() {
+        Money[] result = Money.dollars(1.00).allocate(new long[]{1L});
+        assertEquals(1, result.length);
+        assertEquals(Money.dollars(1.00), result[0]);
+    }
+
+    @Test
+    public void AllocateIntSingleSlotGivesFullAmount() {
+        Money[] result = Money.dollars(1.00).allocate(1);
+        assertEquals(1, result.length);
+        assertEquals(Money.dollars(1.00), result[0]);
     }
 
     @Test

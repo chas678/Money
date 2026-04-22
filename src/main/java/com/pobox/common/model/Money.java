@@ -258,18 +258,34 @@ public final class Money implements Comparable<Money>, Serializable, Cloneable {
         if (ratios == null || ratios.length == 0) {
             throw new IllegalArgumentException("Ratios must not be null or empty");
         }
-        long total = Arrays.stream(ratios).sum();
-        if (total <= 0) {
+        long total = 0;
+        for (long ratio : ratios) {
+            if (ratio < 0) {
+                throw new IllegalArgumentException("Ratios must be non-negative");
+            }
+            total = Math.addExact(total, ratio);
+        }
+        if (total == 0) {
             throw new IllegalArgumentException("Sum of ratios must be positive");
         }
-        long remainder = amount;
-        Money[] results = new Money[ratios.length];
-        for (int i = 0; i < results.length; i++) {
-            results[i] = newMoney(amount * ratios[i] / total);
-            remainder -= results[i].amount;
+
+        long[] base = new long[ratios.length];
+        long allocated = 0;
+        for (int i = 0; i < ratios.length; i++) {
+            // multiplyExact catches the silent overflow of `amount * ratios[i]`.
+            base[i] = Math.multiplyExact(amount, ratios[i]) / total;
+            allocated += base[i];
         }
-        for (int i = 0; i < remainder; i++) {
-            results[i].amount++;
+        long remainder = amount - allocated;
+        long step = Long.signum(remainder);
+        long absRemainder = Math.abs(remainder);
+
+        Money[] results = new Money[ratios.length];
+        for (int i = 0; i < ratios.length; i++) {
+            long extra = (i < absRemainder) ? step : 0;
+            // Build a fresh Money rather than mutating the field on a previously
+            // returned instance — keeps the immutable value-type contract intact.
+            results[i] = newMoney(base[i] + extra);
         }
         return results;
     }
