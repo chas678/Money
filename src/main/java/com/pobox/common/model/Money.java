@@ -250,7 +250,7 @@ public final class Money implements Comparable<Money>, Serializable {
      */
     public final Money[] allocate(final int n) {
         if (n <= 0) {
-            throw new IllegalArgumentException("Number of allocations must be positive");
+            throw new IllegalArgumentException("Number of allocations must be positive, was: " + n);
         }
         // Operate on the magnitude so the "leftover minor units" go to the first |remainder|
         // slots regardless of sign — and so amounts > Integer.MAX_VALUE minor units don't
@@ -278,37 +278,62 @@ public final class Money implements Comparable<Money>, Serializable {
     }
 
     /**
-     * Allocate according to prescribed ratios. The base amounts are allocated by simple division, rounding down. So the
-     * allocated amount will always be less than or equal to the total.
+     * Allocate according to prescribed ratios. The base amounts are allocated by
+     * truncating division ({@code amount * ratios[i] / total}) and the leftover
+     * minor units are spread across the first slots so that the slot sum equals
+     * the original amount exactly.
      * <p>
-     * Remainder contains the unallocated amount. Which will always be a whole number less than 'i'. So simply gives
-     * each receiver 1 until the money is gone.
+     * Sign-aware: the per-slot adjustment is {@code Long.signum(remainder)}, so the
+     * leftover is distributed with the same sign as the source. For positive
+     * amounts each of the first {@code |remainder|} slots gets +1 minor unit; for
+     * negative amounts each gets -1. Slots with a zero ratio always allocate to
+     * exactly zero.
      * <p>
-     * For example, $100 allocated by the "ratios" (1, 1, 1) would yield ($34, $33, $33).
+     * For example, $100.00 allocated by the ratios (1, 1, 1) yields ($33.34, $33.33, $33.33);
+     * -$1.00 by (1, 1, 1) yields (-$0.34, -$0.33, -$0.33).
+     * <p>
+     * Throws {@link ArithmeticException} if {@code amount * ratios[i]} or the sum of
+     * ratios overflows {@code long}, and {@link IllegalArgumentException} if any
+     * ratio is negative or the ratios array is null/empty/sums-to-zero.
      *
-     * @param ratios to allocate the remainder to.
-     * @return Money Array of allocated amounts.
+     * @param ratios non-negative ratios to allocate by; must not be null/empty and
+     *               must sum to a positive value.
+     * @return Money Array of allocated amounts; sums to exactly the source amount.
      */
     public final Money[] allocate(final long... ratios) {
         if (ratios == null || ratios.length == 0) {
-            throw new IllegalArgumentException("Ratios must not be null or empty");
+            throw new IllegalArgumentException("Ratios array must not be null or empty");
         }
         long total = 0;
-        for (long ratio : ratios) {
+        for (int i = 0; i < ratios.length; i++) {
+            long ratio = ratios[i];
             if (ratio < 0) {
-                throw new IllegalArgumentException("Ratios must be non-negative");
+                throw new IllegalArgumentException(
+                        "Ratios must be non-negative, but ratios[" + i + "] = " + ratio);
             }
-            total = Math.addExact(total, ratio);
+            try {
+                total = Math.addExact(total, ratio);
+            } catch (ArithmeticException e) {
+                throw new ArithmeticException(
+                        "Sum of ratios overflowed long at index " + i
+                                + " (running total " + total + " + " + ratio + ")");
+            }
         }
         if (total == 0) {
-            throw new IllegalArgumentException("Sum of ratios must be positive");
+            throw new IllegalArgumentException("Sum of ratios must be positive, was zero");
         }
 
         long[] base = new long[ratios.length];
         long allocated = 0;
         for (int i = 0; i < ratios.length; i++) {
-            // multiplyExact catches the silent overflow of `amount * ratios[i]`.
-            base[i] = Math.multiplyExact(amount, ratios[i]) / total;
+            try {
+                // multiplyExact catches the silent overflow of `amount * ratios[i]`.
+                base[i] = Math.multiplyExact(amount, ratios[i]) / total;
+            } catch (ArithmeticException e) {
+                throw new ArithmeticException(
+                        "Allocation overflowed long at index " + i
+                                + " (amount " + amount + " * ratio " + ratios[i] + ")");
+            }
             allocated += base[i];
         }
         long remainder = amount - allocated;
@@ -348,10 +373,12 @@ public final class Money implements Comparable<Money>, Serializable {
      */
     private void assertSameCurrencyAs(final Money arg) {
         if (null == arg) {
-            throw new IllegalArgumentException("Cannot compare money to null.");
+            throw new IllegalArgumentException("Money argument cannot be null");
         }
         if (!currency.equals(arg.getCurrency())) {
-            throw new IllegalArgumentException("Cannot compare different currencies.");
+            throw new IllegalArgumentException(
+                    "Currency mismatch: " + currency.getCurrencyCode()
+                            + " vs " + arg.getCurrency().getCurrencyCode());
         }
     }
 

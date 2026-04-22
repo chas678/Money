@@ -52,7 +52,7 @@ public class MoneyTest {
     public void AddDiffCurrencies() {
         bMoney = new Money(1.11, Currency.getInstance("NZD"));
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.add(bMoney));
-        assertEquals("Cannot compare different currencies.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Currency mismatch"));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class MoneyTest {
     @Test
     public void AddNull() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.add(null));
-        assertEquals("Cannot compare money to null.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Money argument cannot be null"));
     }
 
     @Test
@@ -262,19 +262,27 @@ public class MoneyTest {
 
     @Test
     public void AllocateRatiosOverflowFailsLoud() {
-        // amount * ratios[0] overflows long — must throw, not wrap silently.
+        // amount * ratios[0] overflows long — must throw, not wrap silently. Pin
+        // the message so a future regression that throws from a *different* overflow
+        // site (e.g. addExact in the sum loop) doesn't masquerade as still-passing.
         Money big = new Money(BigDecimal.valueOf(Long.MAX_VALUE / 1_000L, 2),
                 Currency.getInstance("USD"),
                 RoundingMode.UNNECESSARY);
         long[] ratios = {1_000_000L, 1L};
-        assertThrows(ArithmeticException.class, () -> big.allocate(ratios));
+        ArithmeticException ex = assertThrows(ArithmeticException.class, () -> big.allocate(ratios));
+        assertThat(ex.getMessage(), containsString("Allocation overflowed"));
+        assertThat(ex.getMessage(), containsString("index 0"));
     }
 
     @Test
     public void AllocateRatiosSumOverflowFailsLoud() {
-        // Sum of ratios overflows long — must throw, not wrap silently.
+        // Sum of ratios overflows long — must throw, not wrap silently. Pin the
+        // message so this test can't accidentally cover a different overflow site.
         long[] ratios = {Long.MAX_VALUE, 1L};
-        assertThrows(ArithmeticException.class, () -> Money.dollars(1.00).allocate(ratios));
+        ArithmeticException ex = assertThrows(ArithmeticException.class,
+                () -> Money.dollars(1.00).allocate(ratios));
+        assertThat(ex.getMessage(), containsString("Sum of ratios overflowed"));
+        assertThat(ex.getMessage(), containsString("index 1"));
     }
 
     @Test
@@ -421,13 +429,13 @@ public class MoneyTest {
     public void GreaterThanDiffCurrencies() {
         bMoney = new Money(2323.21, Currency.getInstance("AUD"));
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.greaterThan(bMoney));
-        assertEquals("Cannot compare different currencies.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Currency mismatch"));
     }
 
     @Test
     public void GreaterThanNull() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.greaterThan(null));
-        assertEquals("Cannot compare money to null.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Money argument cannot be null"));
     }
 
     @Test
@@ -440,13 +448,13 @@ public class MoneyTest {
     public void LessThanDiffCurrencies() {
         bMoney = new Money(2323.21, Currency.getInstance("AUD"));
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.lessThan(bMoney));
-        assertEquals("Cannot compare different currencies.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Currency mismatch"));
     }
 
     @Test
     public void LessThanNull() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.lessThan(null));
-        assertEquals("Cannot compare money to null.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Money argument cannot be null"));
     }
 
     @Test
@@ -515,7 +523,7 @@ public class MoneyTest {
     public void SubtractDiffCurrencies() {
         bMoney = new Money(1.11, Currency.getInstance("NZD"));
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.subtract(bMoney));
-        assertEquals("Cannot compare different currencies.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Currency mismatch"));
     }
 
     @Test
@@ -530,7 +538,7 @@ public class MoneyTest {
     @Test
     public void subtractNull() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> aMoney.subtract(null));
-        assertEquals("Cannot compare money to null.", exception.getMessage());
+        assertThat(exception.getMessage(), containsString("Money argument cannot be null"));
     }
 
     @Test
