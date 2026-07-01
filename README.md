@@ -4,6 +4,8 @@ An implementation of Martin Fowlers Money/Value/Quantity patterns found in PofEA
 
 See docs folder for more info.
 
+Licensed under the [MIT License](LICENSE).
+
 ## Money class, Represents a monetary value.
 
 For a full description see the book Patterns of Enterprise Application Architecture (Martin Fowler) page 488 or
