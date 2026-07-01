@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deserialise via BigDecimal instead of double
 - Reject NaN/Infinity, detect long ctor overflow, reject empty AllocationResult
 - Serialise amount as JSON string to preserve precision on the wire
+- Atomic release push, regenerate changelog seed, correct cliff.toml comment
 
 ### Build System
 
@@ -33,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bump to Jackson 3.1.2, JUnit 6.0.3, and drop sysout-over-slf4j
 - Bump dependency versions, add MIT licence and CLAUDE.md
+- Retarget CI, release, and docs from java25 to main
 
 ### Refactor
 
