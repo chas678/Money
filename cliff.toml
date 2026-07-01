@@ -46,5 +46,6 @@ commit_parsers = [
   { message = "^chore", group = "Miscellaneous" },
   { body = ".*security", group = "Security" },
 ]
-# Drop merge commits from the changelog.
+# No commit message preprocessors configured. Merge and other non-conventional
+# commits are excluded via `filter_unconventional = true` above, not by this list.
 commit_preprocessors = []

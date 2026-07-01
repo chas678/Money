@@ -14,10 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reject NaN/Infinity, detect long ctor overflow, reject empty AllocationResult
 - Serialise amount as JSON string to preserve precision on the wire
 
+### Build System
+
+- Add git-cliff config and seed CHANGELOG
+
+### CI
+
+- Add mvn verify gate on PRs and pushes to java25
+- Add manual-dispatch semver release workflow
+
 ### Documentation
 
 - Add change-management (semver/tagging/changelog) design spec
 - Add change-management implementation plan
+- Add CONTRIBUTING (Conventional Commits) and RELEASING guides
 
 ### Miscellaneous
 

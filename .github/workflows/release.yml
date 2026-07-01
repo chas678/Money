@@ -87,8 +87,7 @@ jobs:
           git add pom.xml CHANGELOG.md
           git commit -m "chore(release): v${{ steps.ver.outputs.next }} [skip ci]"
           git tag -a v${{ steps.ver.outputs.next }} -m "v${{ steps.ver.outputs.next }}"
-          git push origin HEAD:java25
-          git push origin v${{ steps.ver.outputs.next }}
+          git push --atomic origin HEAD:java25 v${{ steps.ver.outputs.next }}
 
       - name: Create GitHub Release
         env:
