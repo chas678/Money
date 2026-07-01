@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [java25]
+    branches: [main]
   push:
-    branches: [java25]
+    branches: [main]
 
 jobs:
   build:

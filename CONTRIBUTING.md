@@ -31,6 +31,6 @@ Examples:
 
 ## Workflow
 
-1. Branch off `java25`, make changes, keep tests green (`mvn verify`).
-2. Open a PR to `java25`; CI runs `mvn verify`.
+1. Branch off `main`, make changes, keep tests green (`mvn verify`).
+2. Open a PR to `main`; CI runs `mvn verify`.
 3. Merge once green. Releases are cut separately — see [RELEASING.md](RELEASING.md).

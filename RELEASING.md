@@ -6,8 +6,8 @@ The pom `<version>` always reflects the last release (no `-SNAPSHOT`).
 
 ## Cut a release
 
-1. Ensure `java25` is green and holds the commits you want to ship.
-2. GitHub → **Actions** → **Release** → **Run workflow**, on branch `java25`.
+1. Ensure `main` is green and holds the commits you want to ship.
+2. GitHub → **Actions** → **Release** → **Run workflow**, on branch `main`.
 3. Choose a **bump**:
    - `auto` (default) — derives the version from Conventional Commits since the last tag.
    - `patch` / `minor` / `major` — force it when you disagree with the derivation.
@@ -27,7 +27,7 @@ gh release delete vX.Y.Z --yes
 git push origin :refs/tags/vX.Y.Z      # delete remote tag
 git tag -d vX.Y.Z                      # delete local tag
 git revert <release-commit-sha>        # undo the pom/changelog bump, or reset if unpushed
-git push origin java25
+git push origin main
 ```
 
 Then re-dispatch the Release workflow.
