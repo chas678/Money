@@ -23,7 +23,7 @@
 
         <hamcrest.version>3.0</hamcrest.version>
         <hamcrestjson.version>0.3</hamcrestjson.version>
-        <jackson.version>3.2.0</jackson.version>
+        <jackson.version>3.2.1</jackson.version>
         <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
         <junit-jupiter.version>6.1.1</junit-jupiter.version>
         <logback.version>1.5.37</logback.version>
